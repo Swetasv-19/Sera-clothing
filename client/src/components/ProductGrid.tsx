@@ -2,16 +2,7 @@
 
 import ProductCard from "./ProductCard";
 import { Icon } from "@iconify/react";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  isNew?: boolean;
-  discount?: number;
-}
+import { Product } from "../types/product";
 
 interface ProductGridProps {
   products: Product[];
@@ -21,42 +12,72 @@ interface ProductGridProps {
 
 export default function ProductGrid({ products, title, subtitle }: ProductGridProps) {
   return (
-    <section className="py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        {(title || subtitle) && (
-          <div className="text-center mb-12">
-            {title && (
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-cyprus mb-4">
-                {title}
-              </h2>
-            )}
-            {subtitle && (
-              <p className="text-lg text-cyprus/70 max-w-2xl mx-auto">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+    <div>
+      {/* Optional section header */}
+      {(title || subtitle) && (
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          {title && (
+            <h2
+              className="font-serif"
+              style={{ color: "var(--foreground)", marginBottom: "0.75rem" }}
+            >
+              {title}
+            </h2>
+          )}
+          {subtitle && (
+            <p style={{ fontSize: "1.1rem", color: "var(--muted)" }}>{subtitle}</p>
+          )}
         </div>
+      )}
 
-        {/* Empty State */}
-        {products.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-sand rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon icon="mdi:package-variant" width="32" height="32" className="text-cyprus/40" />
-            </div>
-            <h3 className="text-xl font-semibold text-cyprus mb-2">No products found</h3>
-            <p className="text-cyprus/60">Check back later for new arrivals</p>
-          </div>
-        )}
+      {/* Products grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 260px), 1fr))",
+          gap: "1.5rem",
+        }}
+      >
+        {products.map((product) => (
+          <ProductCard key={product._id} product={product} />
+        ))}
       </div>
-    </section>
+
+      {/* Empty state */}
+      {products.length === 0 && (
+        <div style={{ textAlign: "center", padding: "4rem 1rem" }}>
+          <div
+            style={{
+              width: "5rem",
+              height: "5rem",
+              borderRadius: "50%",
+              backgroundColor: "var(--surface)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.25rem",
+            }}
+          >
+            <Icon
+              icon="mdi:package-variant"
+              width={32}
+              height={32}
+              style={{ color: "var(--muted)" }}
+            />
+          </div>
+          <h3
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 600,
+              color: "var(--foreground)",
+              marginBottom: "0.5rem",
+            }}
+          >
+            No products found
+          </h3>
+          <p style={{ color: "var(--muted)" }}>Check back later for new arrivals</p>
+        </div>
+      )}
+    </div>
   );
 }
