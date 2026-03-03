@@ -1,27 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --navbar-bg: #ffffff;
-  --navbar-text: #374151;
-  --navbar-hover: #4f46e5;
-  --navbar-border: #e5e7eb;
+  --background: #FFF3E6;
+  --foreground: #004643;
+  --navbar-bg: #F0EDE5;
+  --navbar-text: #004643;
+  --navbar-hover: #381932;
+  --navbar-border: #004643;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --navbar-bg: #111827;
-  --navbar-text: #f3f4f6;
-  --navbar-hover: #818cf8;
-  --navbar-border: #374151;
+  --background: #004643;
+  --foreground: #F0EDE5;
+  --navbar-bg: #381932;
+  --navbar-text: #F0EDE5;
+  --navbar-hover: #FFF3E6;
+  --navbar-border: #F0EDE5;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background-color: #004643;
+  color: #FFF3E6;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.btn-primary:hover {
+  background-color: rgba(0, 70, 67, 0.9);
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: #381932;
+  color: #FFF3E6;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(56, 25, 50, 0.9);
+  transform: scale(1.05);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #004643, #381932);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 70, 67, 0.1), 0 2px 4px -1px rgba(0, 70, 67, 0.06);
 }
 
 @keyframes fadeIn {

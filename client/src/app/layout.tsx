@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./fonts.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className="transition-colors duration-300">
+      <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 antialiased">
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -31,8 +32,12 @@ export default function RootLayout({
             `,
           }}
         />
-        <Navbar />
-        {children}
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main className="flex-1 px-4 sm:px-6 lg:px-16 pt-8 pb-16">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
