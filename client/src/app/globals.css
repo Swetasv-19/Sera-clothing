@@ -3,20 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --navbar-bg: #ffffff;
+  --navbar-text: #374151;
+  --navbar-hover: #4f46e5;
+  --navbar-border: #e5e7eb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --navbar-bg: #111827;
+  --navbar-text: #f3f4f6;
+  --navbar-hover: #818cf8;
+  --navbar-border: #374151;
 }
 
 body {
@@ -30,6 +29,7 @@ body {
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -39,4 +39,3 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-in-out;
 }
-

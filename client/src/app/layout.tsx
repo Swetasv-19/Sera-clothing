@@ -13,8 +13,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className="transition-colors duration-300">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const storedTheme = localStorage.getItem('theme');
+                if (storedTheme) {
+                  document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+                } else {
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  document.documentElement.classList.toggle('dark', prefersDark);
+                  localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
+                }
+              })();
+            `,
+          }}
+        />
         <Navbar />
         {children}
       </body>
