@@ -14,6 +14,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/api/users', require('./routes/user'));
+app.use('/api/products', require('./routes/products'));
 
 app.get('/favicon.ico', (req, res) => {
   res.status(204).end();
