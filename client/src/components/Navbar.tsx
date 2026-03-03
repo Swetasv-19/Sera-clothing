@@ -6,37 +6,37 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useTheme } from "@/hooks/useTheme";
 
-interface CartItem {
-  id: string;
-  quantity: number;
-}
+const NAV_LINKS = [
+  { href: "/",           label: "Home" },
+  { href: "/shop",       label: "Shop" },
+  { href: "/collections",label: "Collections" },
+  { href: "/about",      label: "About" },
+  { href: "/contact",    label: "Contact" },
+] as const;
 
 export default function Navbar() {
   const router = useRouter();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [isLoggedIn,       setIsLoggedIn]       = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount,        setCartCount]        = useState(0);
+  const [mobileMenuOpen,   setMobileMenuOpen]   = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Initialize from localStorage
+  /* ── Init from localStorage ── */
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser  = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
-    const storedCart = localStorage.getItem("cart");
+    const storedCart  = localStorage.getItem("cart");
 
-    if (storedUser && storedToken) {
-      setIsLoggedIn(true);
-    }
+    if (storedUser && storedToken) setIsLoggedIn(true);
 
     if (storedCart) {
       try {
         const cart = JSON.parse(storedCart);
-        setCartItems(cart);
         setCartCount(
-          cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
+          cart.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)
         );
       } catch (e) {
         console.error("Error parsing cart:", e);
@@ -44,378 +44,668 @@ export default function Navbar() {
     }
   }, []);
 
-  // Listen for cart updates
+  /* ── Cross-tab storage sync ── */
   useEffect(() => {
-    const handleCartUpdate = (e: StorageEvent) => {
-      if (e.key === "cart" && e.newValue) {
-        try {
-          const cart = JSON.parse(e.newValue);
-          setCartItems(cart);
-          setCartCount(
-            cart.reduce(
-              (sum: number, item: CartItem) => sum + item.quantity,
-              0,
-            ),
-          );
-        } catch (e) {
-          console.error("Error parsing cart:", e);
+    const handler = (e: StorageEvent) => {
+      if (e.key === "cart") {
+        if (e.newValue) {
+          try {
+            const cart = JSON.parse(e.newValue);
+            setCartCount(
+              cart.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)
+            );
+          } catch (err) {
+            console.error("Error parsing cart:", err);
+          }
+        } else {
+          setCartCount(0);
         }
       }
-      if (e.key === "user" && !e.newValue) {
-        setIsLoggedIn(false);
-      }
-      if (e.key === "token" && !e.newValue) {
+      if ((e.key === "user" || e.key === "token") && !e.newValue) {
         setIsLoggedIn(false);
       }
     };
-
-    window.addEventListener("storage", handleCartUpdate);
-    return () => window.removeEventListener("storage", handleCartUpdate);
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
   }, []);
 
-  // Close dropdown when clicking outside
+  /* ── Click-outside closes dropdown ── */
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+    if (!showUserDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false);
       }
     };
-
-    if (showUserDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [showUserDropdown]);
 
-  const handleLogin = () => {
-    router.push("/auth/login");
-    setShowUserDropdown(false);
-    setMobileMenuOpen(false);
-  };
+  /* ── Helpers ── */
+  const close = () => { setShowUserDropdown(false); setMobileMenuOpen(false); };
 
-  const handleSignup = () => {
-    router.push("/auth/signup");
-    setShowUserDropdown(false);
-    setMobileMenuOpen(false);
-  };
+  const go = (path: string) => { router.push(path); close(); };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setShowUserDropdown(false);
-    setMobileMenuOpen(false);
+    close();
     router.push("/");
   };
 
-  const handleProfile = () => {
-    router.push("/user");
-    setShowUserDropdown(false);
-    setMobileMenuOpen(false);
-  };
+  const dropdownHoverIn  = (e: React.MouseEvent<HTMLButtonElement>) =>
+    (e.currentTarget.style.backgroundColor = "var(--surface)");
+  const dropdownHoverOut = (e: React.MouseEvent<HTMLButtonElement>) =>
+    (e.currentTarget.style.backgroundColor = "transparent");
 
+  /* ── Render ── */
   return (
-    <nav className="sticky top-0 z-50 transition-all duration-300" style={{ backgroundColor: '#F0EDE5', borderBottom: '1px solid rgba(0, 70, 67, 0.2)' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo Section */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="group">
-              <div className="flex items-center space-x-3 cursor-pointer transition-all duration-300 transform hover:scale-105">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-90 transition-colors duration-300" style={{ backgroundColor: '#004643' }}>
-                  <Icon
-                    icon="mdi:clothing-store"
-                    width="24"
-                    height="24"
-                    className="text-milk"
-                  />
-                </div>
-                <span className="text-2xl font-bold font-serif group-hover:opacity-80 transition-colors duration-300" style={{ color: '#004643' }}>
-                  Sera
-                </span>
-              </div>
-            </Link>
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        height: "5rem",
+        backgroundColor: "var(--navbar-bg)",
+        borderBottom: "1px solid var(--navbar-border)",
+        transition: "background-color 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "80rem",
+          margin: "0 auto",
+          padding: "0 1.5rem",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "1.5rem",
+        }}
+      >
+        {/* ── Logo ── */}
+        <Link
+          href="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            textDecoration: "none",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              width: "2.25rem",
+              height: "2.25rem",
+              borderRadius: "0.5rem",
+              backgroundColor: "var(--foreground)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "opacity 0.2s",
+            }}
+          >
+            <Icon
+              icon="mdi:clothing-store"
+              width={20}
+              height={20}
+              style={{ color: "var(--background)" }}
+            />
           </div>
+          <span
+            className="font-serif"
+            style={{
+              fontSize: "1.4rem",
+              fontWeight: 700,
+              color: "var(--navbar-text)",
+              transition: "opacity 0.2s",
+            }}
+          >
+            Sera
+          </span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+        {/* ── Desktop nav links — centred ── */}
+        <div
+          style={{
+            display: "none",
+            alignItems: "center",
+            gap: "0.25rem",
+            flex: 1,
+            justifyContent: "center",
+          }}
+          className="desktop-nav"
+        >
+          {NAV_LINKS.map(({ href, label }) => (
             <Link
-              href="/"
-              className="font-medium hover:opacity-80 transition-colors duration-300 relative group px-2"
-              style={{ color: '#004643' }}
+              key={href}
+              href={href}
+              style={{
+                position: "relative",
+                padding: "0.4rem 0.75rem",
+                borderRadius: "0.4rem",
+                fontSize: "0.9rem",
+                fontWeight: 500,
+                color: "var(--navbar-text)",
+                textDecoration: "none",
+                transition: "background-color 0.2s, opacity 0.2s",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              }
             >
-              Home
-              <span
-                className="absolute bottom-0 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: '#381932' }}
-              ></span>
+              {label}
             </Link>
-            <Link
-              href="/shop"
-              className="font-medium hover:opacity-80 transition-colors duration-300 relative group px-2"
-              style={{ color: '#004643' }}
-            >
-              Shop
-              <span
-                className="absolute bottom-0 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: '#381932' }}
-              ></span>
-            </Link>
-            <Link
-              href="/collections"
-              className="font-medium hover:opacity-80 transition-colors duration-300 relative group px-2"
-              style={{ color: '#004643' }}
-            >
-              Collections
-              <span
-                className="absolute bottom-0 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: '#381932' }}
-              ></span>
-            </Link>
-            <Link
-              href="/about"
-              className="font-medium hover:opacity-80 transition-colors duration-300 relative group px-2"
-              style={{ color: '#004643' }}
-            >
-              About
-              <span
-                className="absolute bottom-0 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: '#381932' }}
-              ></span>
-            </Link>
-            <Link
-              href="/contact"
-              className="font-medium hover:opacity-80 transition-colors duration-300 relative group px-2"
-              style={{ color: '#004643' }}
-            >
-              Contact
-              <span
-                className="absolute bottom-0 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: '#381932' }}
-              ></span>
-            </Link>
-          </div>
-
-          {/* Right Section - User Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Search Icon */}
-            <button className="transition-colors duration-300 p-2 rounded-lg hover:bg-opacity-50" style={{ color: '#004643' }}>
-              <Icon icon="mdi:magnify" width="20" height="20" />
-            </button>
-
-            {/* User Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="transition-colors duration-300 p-2 rounded-lg hover:bg-opacity-50"
-                style={{ color: '#004643' }}
-              >
-                {isLoggedIn ? (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#381932' }}>
-                    <Icon
-                      icon="mdi:account"
-                      width="18"
-                      height="18"
-                      className="text-white"
-                    />
-                  </div>
-                ) : (
-                  <Icon icon="mdi:account-circle" width="24" height="24" />
-                )}
-              </button>
-
-              {/* Dropdown Menu */}
-              {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-xl py-2 animate-fadeIn" style={{ backgroundColor: '#FFF3E6', border: '1px solid rgba(0, 70, 67, 0.2)' }}>
-                  {isLoggedIn ? (
-                    <>
-                      <button
-                        onClick={handleProfile}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:account-outline" width="18" height="18" />
-                        <span>Profile</span>
-                      </button>
-                      <button
-                        onClick={() => router.push("/user")}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:package-outline" width="18" height="18" />
-                        <span>Orders</span>
-                      </button>
-                      <button
-                        onClick={() => router.push("/user/settings")}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:cog-outline" width="18" height="18" />
-                        <span>Settings</span>
-                      </button>
-                      <hr style={{ borderColor: 'rgba(0, 70, 67, 0.2)' }} />
-                      <button
-                        onClick={toggleTheme}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon
-                          icon={
-                            isDarkMode
-                              ? "mdi:white-balance-sunny"
-                              : "mdi:moon-waning-crescent"
-                          }
-                          width="18"
-                          height="18"
-                        />
-                        <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-                      </button>
-                      <hr style={{ borderColor: 'rgba(0, 70, 67, 0.2)' }} />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3"
-                        style={{ color: '#dc2626' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:logout" width="18" height="18" />
-                        <span>Logout</span>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={handleLogin}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:login" width="18" height="18" />
-                        <span>Login</span>
-                      </button>
-                      <button
-                        onClick={handleSignup}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon icon="mdi:account-plus" width="18" height="18" />
-                        <span>Sign Up</span>
-                      </button>
-                      <hr style={{ borderColor: 'rgba(0, 70, 67, 0.2)' }} />
-                      <button
-                        onClick={toggleTheme}
-                        className="w-full text-left px-4 py-3 transition-colors duration-200 flex items-center space-x-3 hover:bg-opacity-50"
-                        style={{ color: '#004643' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F0EDE5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <Icon
-                          icon={
-                            isDarkMode
-                              ? "mdi:white-balance-sunny"
-                              : "mdi:moon-waning-crescent"
-                          }
-                          width="18"
-                          height="18"
-                        />
-                        <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Cart Icon */}
-            <Link href="/user/cart" className="relative">
-              <button className="transition-colors duration-300 p-2 rounded-lg hover:bg-opacity-50 relative" style={{ color: '#004643' }}>
-                <Icon icon="mdi:shopping-cart" width="24" height="24" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse" style={{ backgroundColor: '#381932' }}>
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-            </Link>
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="transition-colors duration-300 p-2 rounded-lg hover:bg-opacity-50"
-              style={{ color: '#004643' }}
-            >
-              <Icon
-                icon={mobileMenuOpen ? "mdi:close" : "mdi:menu"}
-                width="24"
-                height="24"
-              />
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden py-4 animate-fadeIn" style={{ backgroundColor: '#FFF3E6', borderTop: '1px solid rgba(0, 70, 67, 0.2)' }}>
-            <div className="flex flex-col space-y-3">
-              <Link
-                href="/"
-                className="font-medium hover:opacity-80 transition-colors duration-300 px-4 py-2 rounded-lg"
-                style={{ color: '#004643' }}
-                onClick={() => setMobileMenuOpen(false)}
+        {/* ── Right actions ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
+
+          {/* Search */}
+          <button
+            aria-label="Search"
+            style={{
+              padding: "0.5rem",
+              borderRadius: "0.4rem",
+              border: "none",
+              background: "transparent",
+              color: "var(--navbar-text)",
+              cursor: "pointer",
+              transition: "background-color 0.2s",
+              display: "flex",
+              alignItems: "center",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+            }
+          >
+            <Icon icon="mdi:magnify" width={20} height={20} />
+          </button>
+
+          {/* User dropdown */}
+          <div style={{ position: "relative" }} ref={dropdownRef}>
+            <button
+              onClick={() => setShowUserDropdown((v) => !v)}
+              aria-label="User menu"
+              aria-expanded={showUserDropdown}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "0.4rem",
+                border: "none",
+                background: "transparent",
+                color: "var(--navbar-text)",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+                display: "flex",
+                alignItems: "center",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              }
+            >
+              {isLoggedIn ? (
+                <div
+                  style={{
+                    width: "2rem",
+                    height: "2rem",
+                    borderRadius: "50%",
+                    backgroundColor: "var(--accent-secondary)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    icon="mdi:account"
+                    width={18}
+                    height={18}
+                    style={{ color: "#FFF3E6" }}
+                  />
+                </div>
+              ) : (
+                <Icon icon="mdi:account-circle" width={24} height={24} />
+              )}
+            </button>
+
+            {/* Dropdown panel */}
+            {showUserDropdown && (
+              <div
+                className="animate-fadeIn"
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 0.5rem)",
+                  right: 0,
+                  minWidth: "13rem",
+                  borderRadius: "0.75rem",
+                  overflow: "hidden",
+                  backgroundColor: "var(--background)",
+                  border: "1px solid var(--divider)",
+                  boxShadow: "0 8px 32px -4px rgba(0,0,0,0.18)",
+                  zIndex: 110,
+                }}
               >
-                Home
-              </Link>
-              <Link
-                href="/shop"
-                className="font-medium hover:opacity-80 transition-colors duration-300 px-4 py-2 rounded-lg"
-                style={{ color: '#004643' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Shop
-              </Link>
-              <Link
-                href="/collections"
-                className="font-medium hover:opacity-80 transition-colors duration-300 px-4 py-2 rounded-lg"
-                style={{ color: '#004643' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Collections
-              </Link>
-              <Link
-                href="/about"
-                className="font-medium hover:opacity-80 transition-colors duration-300 px-4 py-2 rounded-lg"
-                style={{ color: '#004643' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="font-medium hover:opacity-80 transition-colors duration-300 px-4 py-2 rounded-lg"
-                style={{ color: '#004643' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </div>
+                {isLoggedIn ? (
+                  <>
+                    {[
+                      { icon: "mdi:account-outline", label: "Profile",  action: () => go("/user") },
+                      { icon: "mdi:package-outline",  label: "Orders",   action: () => go("/user/orders") },
+                      { icon: "mdi:cog-outline",       label: "Settings", action: () => go("/user/settings") },
+                    ].map(({ icon, label, action }) => (
+                      <button
+                        key={label}
+                        onClick={action}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "0.7rem 1rem",
+                          border: "none",
+                          background: "transparent",
+                          color: "var(--foreground)",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.6rem",
+                          fontSize: "0.875rem",
+                          transition: "background-color 0.15s",
+                        }}
+                        onMouseEnter={dropdownHoverIn}
+                        onMouseLeave={dropdownHoverOut}
+                      >
+                        <Icon icon={icon} width={16} height={16} />
+                        {label}
+                      </button>
+                    ))}
+
+                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+
+                    <button
+                      onClick={toggleTheme}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "0.7rem 1rem",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--foreground)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        fontSize: "0.875rem",
+                        transition: "background-color 0.15s",
+                      }}
+                      onMouseEnter={dropdownHoverIn}
+                      onMouseLeave={dropdownHoverOut}
+                    >
+                      <Icon
+                        icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+                        width={16}
+                        height={16}
+                      />
+                      {isDarkMode ? "Light Mode" : "Dark Mode"}
+                    </button>
+
+                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "0.7rem 1rem",
+                        border: "none",
+                        background: "transparent",
+                        color: "#dc2626",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        fontSize: "0.875rem",
+                        transition: "background-color 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        ((e.currentTarget as HTMLElement).style.backgroundColor = "#fef2f2")
+                      }
+                      onMouseLeave={(e) =>
+                        ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                      }
+                    >
+                      <Icon icon="mdi:logout" width={16} height={16} />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { icon: "mdi:login",       label: "Login",   action: () => go("/auth/login") },
+                      { icon: "mdi:account-plus", label: "Sign Up", action: () => go("/auth/signup") },
+                    ].map(({ icon, label, action }) => (
+                      <button
+                        key={label}
+                        onClick={action}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "0.7rem 1rem",
+                          border: "none",
+                          background: "transparent",
+                          color: "var(--foreground)",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.6rem",
+                          fontSize: "0.875rem",
+                          transition: "background-color 0.15s",
+                        }}
+                        onMouseEnter={dropdownHoverIn}
+                        onMouseLeave={dropdownHoverOut}
+                      >
+                        <Icon icon={icon} width={16} height={16} />
+                        {label}
+                      </button>
+                    ))}
+
+                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+
+                    <button
+                      onClick={toggleTheme}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "0.7rem 1rem",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--foreground)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        fontSize: "0.875rem",
+                        transition: "background-color 0.15s",
+                      }}
+                      onMouseEnter={dropdownHoverIn}
+                      onMouseLeave={dropdownHoverOut}
+                    >
+                      <Icon
+                        icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+                        width={16}
+                        height={16}
+                      />
+                      {isDarkMode ? "Light Mode" : "Dark Mode"}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Cart */}
+          <Link
+            href="/user/cart"
+            aria-label="Cart"
+            style={{ position: "relative", display: "flex" }}
+          >
+            <button
+              style={{
+                padding: "0.5rem",
+                borderRadius: "0.4rem",
+                border: "none",
+                background: "transparent",
+                color: "var(--navbar-text)",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              }
+            >
+              <Icon icon="mdi:shopping-cart" width={22} height={22} />
+              {cartCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-2px",
+                    right: "-2px",
+                    width: "1.1rem",
+                    height: "1.1rem",
+                    borderRadius: "50%",
+                    backgroundColor: "var(--accent-secondary)",
+                    color: "#FFF3E6",
+                    fontSize: "0.65rem",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {cartCount > 9 ? "9+" : cartCount}
+                </span>
+              )}
+            </button>
+          </Link>
+
+          {/* Mobile hamburger — hidden on desktop via CSS */}
+          <button
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+            className="mobile-menu-btn"
+            style={{
+              padding: "0.5rem",
+              borderRadius: "0.4rem",
+              border: "none",
+              background: "transparent",
+              color: "var(--navbar-text)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              transition: "background-color 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+            }
+          >
+            <Icon
+              icon={mobileMenuOpen ? "mdi:close" : "mdi:menu"}
+              width={24}
+              height={24}
+            />
+          </button>
+        </div>
       </div>
+
+      {/* ── Mobile menu drawer ── */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-menu animate-fadeIn"
+          style={{
+            backgroundColor: "var(--navbar-bg)",
+            borderTop: "1px solid var(--divider)",
+            padding: "0.75rem 1rem 1.25rem",
+          }}
+        >
+          {/* Nav links */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={close}
+                style={{
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  color: "var(--navbar-text)",
+                  textDecoration: "none",
+                  display: "block",
+                  transition: "background-color 0.15s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                }
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.75rem 0" }} />
+
+          {/* Auth links on mobile */}
+          {isLoggedIn ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              {[
+                { icon: "mdi:account-outline", label: "Profile",  path: "/user" },
+                { icon: "mdi:package-outline",  label: "Orders",   path: "/user/orders" },
+                { icon: "mdi:cog-outline",       label: "Settings", path: "/user/settings" },
+              ].map(({ icon, label, path }) => (
+                <button
+                  key={label}
+                  onClick={() => go(path)}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "0.75rem 1rem",
+                    borderRadius: "0.5rem",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--navbar-text)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    fontSize: "0.95rem",
+                    fontWeight: 500,
+                    transition: "background-color 0.15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                  }
+                >
+                  <Icon icon={icon} width={18} height={18} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: "0.75rem", padding: "0 0.25rem" }}>
+              <button onClick={() => go("/auth/login")}  className="btn-outline" style={{ flex: 1, justifyContent: "center" }}>Login</button>
+              <button onClick={() => go("/auth/signup")} className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>Sign Up</button>
+            </div>
+          )}
+
+          <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.75rem 0" }} />
+
+          {/* Theme toggle */}
+          <button
+            onClick={() => { toggleTheme(); close(); }}
+            style={{
+              width: "100%",
+              textAlign: "left",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.5rem",
+              border: "none",
+              background: "transparent",
+              color: "var(--navbar-text)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              transition: "background-color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+            }
+          >
+            <Icon
+              icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+              width={20}
+              height={20}
+            />
+            {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          </button>
+
+          {isLoggedIn && (
+            <button
+              onClick={handleLogout}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                border: "none",
+                background: "transparent",
+                color: "#dc2626",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                marginTop: "0.25rem",
+                transition: "background-color 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "#fef2f2")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              }
+            >
+              <Icon icon="mdi:logout" width={20} height={20} />
+              Logout
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Responsive CSS via style tag */}
+      <style>{`
+        /* Show desktop nav above 768px */
+        @media (min-width: 768px) {
+          .desktop-nav       { display: flex !important; }
+          .mobile-menu-btn   { display: none !important; }
+          .mobile-menu       { display: none !important; }
+        }
+        /* Below 768px hide desktop nav  */
+        @media (max-width: 767px) {
+          .desktop-nav { display: none !important; }
+        }
+      `}</style>
     </nav>
   );
 }

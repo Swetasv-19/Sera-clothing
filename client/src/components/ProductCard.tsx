@@ -2,108 +2,274 @@
 
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  isNew?: boolean;
-  discount?: number;
-}
+import { Product } from "../types/product";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const discountedPrice = product.discount 
-    ? product.price * (1 - product.discount / 100)
-    : product.price;
+  const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+  const currentPrice = hasDiscount ? product.discountPrice : product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.price - product.discountPrice!) / product.price) * 100)
+    : 0;
 
   return (
-    <div className="group rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" style={{ backgroundColor: '#FFF3E6' }}>
-      <div className="relative overflow-hidden">
-        <Link href={`/product/${product.id}`}>
-          <div className="aspect-square overflow-hidden" style={{ backgroundColor: '#F0EDE5' }}>
+    <div
+      className="card"
+      style={{ overflow: "hidden" }}
+    >
+      {/* Image area */}
+      <div style={{ position: "relative", overflow: "hidden" }}>
+        <Link href={`/product/${product._id}`} style={{ display: "block" }}>
+          <div
+            style={{
+              aspectRatio: "1 / 1",
+              overflow: "hidden",
+              backgroundColor: "var(--surface-alt)",
+            }}
+          >
             <img
-              src={product.image}
+              src={product.images[0] || "/placeholder-product.jpg"}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transition: "transform 0.5s ease",
+                display: "block",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLImageElement).style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")
+              }
             />
           </div>
-          {product.isNew && (
-            <span className="absolute top-3 left-3 text-white text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#381932' }}>
-              NEW
+
+          {/* Badges */}
+          {product.isFeatured && (
+            <span
+              style={{
+                position: "absolute",
+                top: "0.75rem",
+                left: "0.75rem",
+                backgroundColor: "var(--accent-secondary)",
+                color: "#FFF3E6",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                padding: "0.25rem 0.6rem",
+                borderRadius: "9999px",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              FEATURED
             </span>
           )}
-          {product.discount && (
-            <span className="absolute top-3 right-3 text-white text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#dc2626' }}>
-              -{product.discount}%
+          {hasDiscount && (
+            <span
+              style={{
+                position: "absolute",
+                top: "0.75rem",
+                right: "0.75rem",
+                backgroundColor: "#dc2626",
+                color: "#fff",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                padding: "0.25rem 0.6rem",
+                borderRadius: "9999px",
+              }}
+            >
+              -{discountPercentage}%
             </span>
           )}
         </Link>
-        
-        {/* Quick Actions */}
-        <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-1" style={{ backgroundColor: '#004643', color: '#FFF3E6' }}>
-            <Icon icon="mdi:eye" width="16" height="16" />
-            Quick View
-          </button>
-          <button className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-1" style={{ backgroundColor: '#381932', color: '#FFF3E6' }}>
-            <Icon icon="mdi:shopping-cart" width="16" height="16" />
-            Add to Cart
+
+        {/* Quick actions overlay */}
+        <div
+          className="quick-actions"
+          style={{
+            position: "absolute",
+            bottom: "0.75rem",
+            left: "0.75rem",
+            right: "0.75rem",
+            display: "flex",
+            gap: "0.5rem",
+            opacity: 0,
+            transition: "opacity 0.25s ease",
+          }}
+        >
+          <Link
+            href={`/product/${product._id}`}
+            style={{
+              flex: 1,
+              padding: "0.5rem 0.5rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              backgroundColor: "var(--accent-primary)",
+              color: "var(--background)",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.35rem",
+              transition: "opacity 0.2s",
+              textDecoration: "none"
+            }}
+          >
+            <Icon icon="mdi:eye" width={15} height={15} />
+            View
+          </Link>
+          <button
+            style={{
+              flex: 1,
+              padding: "0.5rem 0.5rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              backgroundColor: "var(--accent-secondary)",
+              color: "#FFF3E6",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.35rem",
+            }}
+          >
+            <Icon icon="mdi:shopping-cart" width={15} height={15} />
+            Add
           </button>
         </div>
       </div>
-      
-      <div className="p-4">
-        <div className="mb-2">
-          <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'rgba(0, 70, 67, 0.6)' }}>
-            {product.category}
-          </span>
-        </div>
-        
-        <Link href={`/product/${product.id}`}>
-          <h3 className="text-lg font-semibold mb-2 hover:opacity-80 transition-colors duration-200 line-clamp-2 font-serif" style={{ color: '#004643' }}>
+
+      {/* Card body */}
+      <div style={{ padding: "1rem" }}>
+        <span
+          style={{
+            fontSize: "0.7rem",
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "var(--muted)",
+            display: "block",
+            marginBottom: "0.35rem",
+          }}
+        >
+          {product.brand} | {product.category}
+        </span>
+
+        <Link href={`/product/${product._id}`} style={{ textDecoration: "none" }}>
+          <h3
+            className="font-serif"
+            style={{
+              fontSize: "1rem",
+              fontWeight: 600,
+              color: "var(--foreground)",
+              marginBottom: "0.65rem",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.opacity = "0.7")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.opacity = "1")
+            }
+          >
             {product.name}
           </h3>
         </Link>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold" style={{ color: '#004643' }}>
-              ${discountedPrice.toFixed(2)}
+
+        {/* Price row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
+            <span
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                color: "var(--foreground)",
+              }}
+            >
+              ${currentPrice?.toFixed(2)}
             </span>
-            {product.discount && (
-              <span className="text-sm line-through" style={{ color: 'rgba(0, 70, 67, 0.4)' }}>
+            {hasDiscount && (
+              <span
+                style={{
+                  fontSize: "0.85rem",
+                  textDecoration: "line-through",
+                  color: "var(--muted)",
+                }}
+              >
                 ${product.price.toFixed(2)}
               </span>
             )}
           </div>
-          
-          <button className="p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-50" style={{ color: '#004643' }}>
-            <Icon icon="mdi:heart-outline" width="20" height="20" />
+
+          <button
+            aria-label="Wishlist"
+            style={{
+              padding: "0.4rem",
+              borderRadius: "0.4rem",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--muted)",
+              transition: "color 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--accent-secondary)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--muted)")
+            }
+          >
+            <Icon icon="mdi:heart-outline" width={20} height={20} />
           </button>
         </div>
-        
-        {/* Rating */}
-        <div className="flex items-center mt-3">
-          <div className="flex" style={{ color: '#eab308' }}>
-            {[...Array(5)].map((_, i) => (
-              <Icon
-                key={i}
-                icon={i < 4 ? "mdi:star" : "mdi:star-outline"}
-                width="14"
-                height="14"
-                style={i < 4 ? { color: '#eab308' } : { color: 'rgba(0, 70, 67, 0.2)' }}
-              />
-            ))}
-          </div>
-          <span className="text-xs ml-2" style={{ color: 'rgba(0, 70, 67, 0.6)' }}>(4.0)</span>
+
+        {/* Stars */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+            marginTop: "0.6rem",
+          }}
+        >
+          {[...Array(5)].map((_, i) => (
+            <Icon
+              key={i}
+              icon={i < 4 ? "mdi:star" : "mdi:star-outline"}
+              width={13}
+              height={13}
+              style={{ color: i < 4 ? "#eab308" : "var(--muted-light)" }}
+            />
+          ))}
+          <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginLeft: "0.25rem" }}>
+            (4.0)
+          </span>
         </div>
       </div>
+
+      {/* Hover style for quick actions — injected via global styles */}
+      <style>{`
+        .card:hover .quick-actions { opacity: 1 !important; }
+      `}</style>
     </div>
   );
 }
