@@ -1,97 +1,194 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
-import Footer from "@/components/Footer";
 import { Icon } from "@iconify/react";
+import { productService } from "@/services/product.service";
+import { Product } from "@/types/product";
 
-// Sample product data
-const featuredProducts = [
+// Fallback products in case API is not running or empty
+const fallbackProducts: Product[] = [
   {
-    id: "1",
+    _id: "1",
     name: "Elegant Silk Blouse",
+    description: "Premium silk blouse for special occasions",
     price: 89.99,
-    image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop",
-    category: "Tops",
-    isNew: true,
+    images: ["https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop"],
+    category: "women",
+    isFeatured: true,
+    isActive: true,
+    brand: "Sera",
+    sizes: ["S", "M", "L"],
+    colors: ["Cream"],
+    stock: 10,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
-    id: "2",
+    _id: "2",
     name: "Classic Wool Coat",
+    description: "Handcrafted wool coat for winter",
     price: 249.99,
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop",
-    category: "Outerwear",
-    discount: 20,
-  },
-  {
-    id: "3",
-    name: "Floral Summer Dress",
-    price: 79.99,
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop",
-    category: "Dresses",
-    isNew: true,
-  },
-  {
-    id: "4",
-    name: "Tailored Trousers",
-    price: 119.99,
-    image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=400&fit=crop",
-    category: "Bottoms",
-  },
-  {
-    id: "5",
-    name: "Cashmere Sweater",
-    price: 159.99,
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-    category: "Knitwear",
-    discount: 15,
-  },
-  {
-    id: "6",
-    name: "Leather Handbag",
-    price: 199.99,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-    category: "Accessories",
-    isNew: true,
-  },
-  {
-    id: "7",
-    name: "Silk Scarf",
-    price: 49.99,
-    image: "https://images.unsplash.com/photo-1584813357593-a5f89b6721db?w=400&h=400&fit=crop",
-    category: "Accessories",
-  },
-  {
-    id: "8",
-    name: "Denim Jacket",
-    price: 89.99,
-    image: "https://images.unsplash.com/photo-1576871337622-98d48d90cf26?w=400&h=400&fit=crop",
-    category: "Outerwear",
-    discount: 10,
+    discountPrice: 199.99,
+    images: ["https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop"],
+    category: "women",
+    isFeatured: true,
+    isActive: true,
+    brand: "Sera",
+    sizes: ["M", "L", "XL"],
+    colors: ["Beige"],
+    stock: 5,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ];
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const response = await productService.getFeaturedProducts();
+        if (response.success && response.data.length > 0) {
+          setProducts(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
+
   return (
-    <main className="min-h-screen space-y-16">
+    <>
       <Hero />
-      
-      {/* Featured Products Section */}
-      <section className="py-16" style={{ backgroundColor: '#F0EDE5' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4" style={{ color: '#004643' }}>
-              Featured Collection
-            </h2>
-            <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(0, 70, 67, 0.7)' }}>
-              Discover our handpicked selection of premium pieces that define modern elegance
-            </p>
+
+      {/* Perks strip */}
+      <section
+        className="section-padding"
+        style={{ backgroundColor: "var(--background)" }}
+      >
+        <div className="container-padded">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "1.5rem",
+            }}
+          >
+            {[
+              {
+                icon: "mdi:truck-delivery",
+                title: "Free Shipping",
+                sub: "On orders over $100",
+              },
+              {
+                icon: "mdi:shield-check",
+                title: "Quality Guarantee",
+                sub: "Premium materials only",
+              },
+              {
+                icon: "mdi:refresh",
+                title: "Easy Returns",
+                sub: "30-day return policy",
+              },
+            ].map(({ icon, title, sub }) => (
+              <div
+                key={title}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  padding: "1.5rem",
+                  borderRadius: "0.75rem",
+                  backgroundColor: "var(--surface)",
+                  border: "1px solid var(--divider)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "0 8px 24px -4px rgba(0,0,0,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                }}
+              >
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "3rem",
+                    height: "3rem",
+                    borderRadius: "50%",
+                    backgroundColor: "var(--muted-light)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span className="text-emerald-900">
+                    <Icon icon={icon} width={22} height={22} />
+                  </span>
+                </div>
+                <div>
+                  <p
+                    style={{
+                      fontWeight: 600,
+                      color: "var(--foreground)",
+                      fontSize: "0.95rem",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {title}
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "var(--muted)", marginTop: "0.2rem" }}>
+                    {sub}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-          <ProductGrid products={featuredProducts} />
         </div>
       </section>
 
-      <Footer />
-    </main>
+      {/* Featured Products */}
+      <section className="section-padding" style={{ backgroundColor: "var(--surface)" }}>
+        <div className="container-padded">
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <h2
+              className="font-serif text-3xl md:text-4xl font-bold"
+              style={{ color: "var(--foreground)", marginBottom: "1rem" }}
+            >
+              Featured Collection
+            </h2>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "var(--muted)",
+                maxWidth: "38rem",
+                margin: "0 auto",
+              }}
+            >
+              Handpicked premium pieces that define modern elegance
+            </p>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-900"></div>
+            </div>
+          ) : (
+            <ProductGrid products={products} />
+          )}
+        </div>
+      </section>
+    </>
   );
 }
