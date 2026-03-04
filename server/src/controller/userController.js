@@ -51,7 +51,52 @@ exports.getMe = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return next(new ErrorResponse('Email already in use', 400));
+      }
+      user.email = email;
+    }
+
+    if (name) {
+      user.name = name;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt
+      }
     });
   } catch (error) {
     next(error);
