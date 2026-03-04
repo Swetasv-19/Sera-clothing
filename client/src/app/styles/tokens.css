@@ -1,0 +1,47 @@
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --background: #fff3e6;
+  --foreground: #004643;
+  --surface: #f0ede5;
+  --surface-alt: #e8e4dc;
+
+  --navbar-bg: #f0ede5;
+  --navbar-text: #004643;
+  --navbar-hover: #381932;
+  --navbar-border: rgba(0, 70, 67, 0.2);
+
+  --card-bg: #fff3e6;
+  --card-border: rgba(0, 70, 67, 0.1);
+
+  --accent-primary: #004643;
+  --accent-secondary: #381932;
+  --muted: rgba(0, 70, 67, 0.55);
+  --muted-light: rgba(0, 70, 67, 0.15);
+
+  --divider: rgba(0, 70, 67, 0.15);
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+}
+
+.dark {
+  --background: #0d1f1e;
+  --foreground: #f0ede5;
+  --surface: #162b2a;
+  --surface-alt: #1e3635;
+
+  --navbar-bg: #1e3635;
+  --navbar-text: #f0ede5;
+  --navbar-hover: #c9a8c0;
+  --navbar-border: rgba(240, 237, 229, 0.15);
+
+  --card-bg: #162b2a;
+  --card-border: rgba(240, 237, 229, 0.1);
+
+  --accent-primary: #7ecec9;
+  --accent-secondary: #c9a8c0;
+  --muted: rgba(240, 237, 229, 0.55);
+  --muted-light: rgba(240, 237, 229, 0.12);
+
+  --divider: rgba(240, 237, 229, 0.12);
+}
