@@ -5,38 +5,51 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/AuthContext";
 
 const NAV_LINKS = [
-  { href: "/",           label: "Home" },
-  { href: "/shop",       label: "Shop" },
-  { href: "/collections",label: "Collections" },
-  { href: "/about",      label: "About" },
-  { href: "/contact",    label: "Contact" },
+  { href: "/", label: "Home" },
+  {
+    href: "/shop",
+    label: "Shop",
+    dropdown: [
+      {
+        href: "/collections",
+        label: "Collections",
+        icon: "mdi:layers-outline",
+      },
+      { href: "/shop?new=true", label: "New Arrivals", icon: "mdi:sparkles" },
+      { href: "/shop?sale=true", label: "Sale", icon: "mdi:sale-outline" },
+    ],
+  },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export default function Navbar() {
   const router = useRouter();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
-  const [isLoggedIn,       setIsLoggedIn]       = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [cartCount,        setCartCount]        = useState(0);
-  const [mobileMenuOpen,   setMobileMenuOpen]   = useState(false);
+  const [showShopDropdown, setShowShopDropdown] = useState(false);
+  const [mobileShopOpen, setMobileShopOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const shopRef = useRef<HTMLDivElement>(null);
 
   /* ── Init from localStorage ── */
   useEffect(() => {
-    const storedUser  = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-    const storedCart  = localStorage.getItem("cart");
-
-    if (storedUser && storedToken) setIsLoggedIn(true);
+    const storedCart = localStorage.getItem("cart");
 
     if (storedCart) {
       try {
         const cart = JSON.parse(storedCart);
         setCartCount(
-          cart.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)
+          cart.reduce(
+            (s: number, i: { quantity: number }) => s + i.quantity,
+            0,
+          ),
         );
       } catch (e) {
         console.error("Error parsing cart:", e);
@@ -52,7 +65,10 @@ export default function Navbar() {
           try {
             const cart = JSON.parse(e.newValue);
             setCartCount(
-              cart.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)
+              cart.reduce(
+                (s: number, i: { quantity: number }) => s + i.quantity,
+                0,
+              ),
             );
           } catch (err) {
             console.error("Error parsing cart:", err);
@@ -61,9 +77,6 @@ export default function Navbar() {
           setCartCount(0);
         }
       }
-      if ((e.key === "user" || e.key === "token") && !e.newValue) {
-        setIsLoggedIn(false);
-      }
     };
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
@@ -71,30 +84,40 @@ export default function Navbar() {
 
   /* ── Click-outside closes dropdown ── */
   useEffect(() => {
-    if (!showUserDropdown) return;
+    if (!showUserDropdown && !showShopDropdown) return;
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setShowUserDropdown(false);
+      }
+      if (shopRef.current && !shopRef.current.contains(target)) {
+        setShowShopDropdown(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [showUserDropdown]);
+  }, [showUserDropdown, showShopDropdown]);
 
   /* ── Helpers ── */
-  const close = () => { setShowUserDropdown(false); setMobileMenuOpen(false); };
+  const close = () => {
+    setShowUserDropdown(false);
+    setShowShopDropdown(false);
+    setMobileMenuOpen(false);
+    setMobileShopOpen(false);
+  };
 
-  const go = (path: string) => { router.push(path); close(); };
+  const go = (path: string) => {
+    router.push(path);
+    close();
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
+    logout();
     close();
     router.push("/");
   };
 
-  const dropdownHoverIn  = (e: React.MouseEvent<HTMLButtonElement>) =>
+  const dropdownHoverIn = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = "var(--surface)");
   const dropdownHoverOut = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = "transparent");
@@ -178,36 +201,150 @@ export default function Navbar() {
           }}
           className="desktop-nav"
         >
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                position: "relative",
-                padding: "0.4rem 0.75rem",
-                borderRadius: "0.4rem",
-                fontSize: "0.9rem",
-                fontWeight: 500,
-                color: "var(--navbar-text)",
-                textDecoration: "none",
-                transition: "background-color 0.2s, opacity 0.2s",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
-              }
-            >
-              {label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const hasDropdown = "dropdown" in link;
+            return (
+              <div
+                key={link.label}
+                style={{ position: "relative" }}
+                ref={hasDropdown && link.label === "Shop" ? shopRef : null}
+                onMouseEnter={() =>
+                  hasDropdown &&
+                  link.label === "Shop" &&
+                  setShowShopDropdown(true)
+                }
+                onMouseLeave={() =>
+                  hasDropdown &&
+                  link.label === "Shop" &&
+                  setShowShopDropdown(false)
+                }
+              >
+                <Link
+                  href={link.href}
+                  style={{
+                    position: "relative",
+                    padding: "0.4rem 0.75rem",
+                    borderRadius: "0.4rem",
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                    color: "var(--navbar-text)",
+                    textDecoration: "none",
+                    transition: "background-color 0.2s, opacity 0.2s",
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                  }}
+                  onMouseEnter={(e) =>
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "var(--muted-light)")
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "transparent")
+                  }
+                  onClick={(e) => {
+                    if (hasDropdown) {
+                      // On click, we don't necessarily want to navigate if it's just meant to open the dropdown
+                      // But for shop, usually clicking the main link goes to the shop page too.
+                      // We'll keep default behavior unless we want it to ONLY toggle.
+                    }
+                  }}
+                >
+                  {link.label}
+                  {hasDropdown && (
+                    <Icon
+                      icon="mdi:chevron-down"
+                      width={14}
+                      style={{
+                        transition: "transform 0.2s",
+                        transform: showShopDropdown ? "rotate(180deg)" : "none",
+                      }}
+                    />
+                  )}
+                </Link>
+
+                {hasDropdown && link.label === "Shop" && showShopDropdown && (
+                  <div
+                    className="animate-fadeIn"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%) translateY(0.5rem)",
+                      minWidth: "14rem",
+                      backgroundColor: "var(--background)",
+                      border: "1px solid var(--divider)",
+                      borderRadius: "0.75rem",
+                      boxShadow: "0 12px 40px -8px rgba(0,0,0,0.15)",
+                      overflow: "hidden",
+                      zIndex: 110,
+                      padding: "0.5rem",
+                    }}
+                  >
+                    {link.dropdown?.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={close}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                          padding: "0.7rem 1rem",
+                          borderRadius: "0.5rem",
+                          fontSize: "0.875rem",
+                          color: "var(--foreground)",
+                          textDecoration: "none",
+                          transition: "background-color 0.15s",
+                        }}
+                        onMouseEnter={(e) =>
+                          ((
+                            e.currentTarget as HTMLElement
+                          ).style.backgroundColor = "var(--surface)")
+                        }
+                        onMouseLeave={(e) =>
+                          ((
+                            e.currentTarget as HTMLElement
+                          ).style.backgroundColor = "transparent")
+                        }
+                      >
+                        <div
+                          style={{
+                            width: "2rem",
+                            height: "2rem",
+                            borderRadius: "0.4rem",
+                            backgroundColor: "var(--muted-light)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Icon icon={item.icon} width={18} height={18} />
+                        </div>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <span style={{ fontWeight: 600 }}>{item.label}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* ── Right actions ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
-
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+            flexShrink: 0,
+          }}
+        >
           {/* Search */}
           <button
             aria-label="Search"
@@ -223,10 +360,12 @@ export default function Navbar() {
               alignItems: "center",
             }}
             onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "var(--muted-light)")
             }
             onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "transparent")
             }
           >
             <Icon icon="mdi:magnify" width={20} height={20} />
@@ -250,13 +389,15 @@ export default function Navbar() {
                 alignItems: "center",
               }}
               onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "var(--muted-light)")
               }
               onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "transparent")
               }
             >
-              {isLoggedIn ? (
+              {user ? (
                 <div
                   style={{
                     width: "2rem",
@@ -297,12 +438,24 @@ export default function Navbar() {
                   zIndex: 110,
                 }}
               >
-                {isLoggedIn ? (
+                {user ? (
                   <>
                     {[
-                      { icon: "mdi:account-outline", label: "Profile",  action: () => go("/user") },
-                      { icon: "mdi:package-outline",  label: "Orders",   action: () => go("/user/orders") },
-                      { icon: "mdi:cog-outline",       label: "Settings", action: () => go("/user/settings") },
+                      {
+                        icon: "mdi:account-outline",
+                        label: "Profile",
+                        action: () => go("/user"),
+                      },
+                      {
+                        icon: "mdi:package-outline",
+                        label: "Orders",
+                        action: () => go("/user/orders"),
+                      },
+                      {
+                        icon: "mdi:cog-outline",
+                        label: "Settings",
+                        action: () => go("/user/settings"),
+                      },
                     ].map(({ icon, label, action }) => (
                       <button
                         key={label}
@@ -329,7 +482,13 @@ export default function Navbar() {
                       </button>
                     ))}
 
-                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "var(--divider)",
+                        margin: "0.25rem 0",
+                      }}
+                    />
 
                     <button
                       onClick={toggleTheme}
@@ -351,14 +510,24 @@ export default function Navbar() {
                       onMouseLeave={dropdownHoverOut}
                     >
                       <Icon
-                        icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+                        icon={
+                          isDarkMode
+                            ? "mdi:white-balance-sunny"
+                            : "mdi:moon-waning-crescent"
+                        }
                         width={16}
                         height={16}
                       />
                       {isDarkMode ? "Light Mode" : "Dark Mode"}
                     </button>
 
-                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "var(--divider)",
+                        margin: "0.25rem 0",
+                      }}
+                    />
 
                     <button
                       onClick={handleLogout}
@@ -377,10 +546,14 @@ export default function Navbar() {
                         transition: "background-color 0.15s",
                       }}
                       onMouseEnter={(e) =>
-                        ((e.currentTarget as HTMLElement).style.backgroundColor = "#fef2f2")
+                        ((
+                          e.currentTarget as HTMLElement
+                        ).style.backgroundColor = "#fef2f2")
                       }
                       onMouseLeave={(e) =>
-                        ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                        ((
+                          e.currentTarget as HTMLElement
+                        ).style.backgroundColor = "transparent")
                       }
                     >
                       <Icon icon="mdi:logout" width={16} height={16} />
@@ -390,8 +563,16 @@ export default function Navbar() {
                 ) : (
                   <>
                     {[
-                      { icon: "mdi:login",       label: "Login",   action: () => go("/auth/login") },
-                      { icon: "mdi:account-plus", label: "Sign Up", action: () => go("/auth/signup") },
+                      {
+                        icon: "mdi:login",
+                        label: "Login",
+                        action: () => go("/auth/login"),
+                      },
+                      {
+                        icon: "mdi:account-plus",
+                        label: "Sign Up",
+                        action: () => go("/auth/signup"),
+                      },
                     ].map(({ icon, label, action }) => (
                       <button
                         key={label}
@@ -418,7 +599,13 @@ export default function Navbar() {
                       </button>
                     ))}
 
-                    <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.25rem 0" }} />
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "var(--divider)",
+                        margin: "0.25rem 0",
+                      }}
+                    />
 
                     <button
                       onClick={toggleTheme}
@@ -440,7 +627,11 @@ export default function Navbar() {
                       onMouseLeave={dropdownHoverOut}
                     >
                       <Icon
-                        icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+                        icon={
+                          isDarkMode
+                            ? "mdi:white-balance-sunny"
+                            : "mdi:moon-waning-crescent"
+                        }
                         width={16}
                         height={16}
                       />
@@ -472,10 +663,12 @@ export default function Navbar() {
                 position: "relative",
               }}
               onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "var(--muted-light)")
               }
               onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "transparent")
               }
             >
               <Icon icon="mdi:shopping-cart" width={22} height={22} />
@@ -521,10 +714,12 @@ export default function Navbar() {
               transition: "background-color 0.2s",
             }}
             onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "var(--muted-light)")
             }
             onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "transparent")
             }
           >
             <Icon
@@ -547,43 +742,140 @@ export default function Navbar() {
           }}
         >
           {/* Nav links */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={close}
-                style={{
-                  padding: "0.75rem 1rem",
-                  borderRadius: "0.5rem",
-                  fontSize: "0.95rem",
-                  fontWeight: 500,
-                  color: "var(--navbar-text)",
-                  textDecoration: "none",
-                  display: "block",
-                  transition: "background-color 0.15s",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
-                }
-              >
-                {label}
-              </Link>
-            ))}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
+          >
+            {NAV_LINKS.map((link) => {
+              const hasDropdown = "dropdown" in link;
+              return (
+                <div key={link.label}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "0.75rem 1rem",
+                      borderRadius: "0.5rem",
+                      cursor: "pointer",
+                      transition: "background-color 0.15s",
+                    }}
+                    onClick={() => {
+                      if (hasDropdown) setMobileShopOpen(!mobileShopOpen);
+                      else go(link.href);
+                    }}
+                    onMouseEnter={(e) =>
+                      ((e.currentTarget as HTMLElement).style.backgroundColor =
+                        "var(--muted-light)")
+                    }
+                    onMouseLeave={(e) =>
+                      ((e.currentTarget as HTMLElement).style.backgroundColor =
+                        "transparent")
+                    }
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.95rem",
+                        fontWeight: 500,
+                        color: "var(--navbar-text)",
+                      }}
+                    >
+                      {link.label}
+                    </span>
+                    {hasDropdown && (
+                      <Icon
+                        icon="mdi:chevron-down"
+                        width={20}
+                        style={{
+                          transition: "transform 0.2s",
+                          transform: mobileShopOpen ? "rotate(180deg)" : "none",
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {hasDropdown && mobileShopOpen && (
+                    <div
+                      style={{
+                        marginLeft: "1rem",
+                        paddingLeft: "0.5rem",
+                        borderLeft: "2px solid var(--divider)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.25rem",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      {link.dropdown?.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={close}
+                          style={{
+                            padding: "0.7rem 1rem",
+                            borderRadius: "0.5rem",
+                            fontSize: "0.9rem",
+                            color: "var(--navbar-text)",
+                            textDecoration: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.75rem",
+                            transition: "background-color 0.15s",
+                          }}
+                          onMouseEnter={(e) =>
+                            ((
+                              e.currentTarget as HTMLElement
+                            ).style.backgroundColor = "var(--muted-light)")
+                          }
+                          onMouseLeave={(e) =>
+                            ((
+                              e.currentTarget as HTMLElement
+                            ).style.backgroundColor = "transparent")
+                          }
+                        >
+                          <Icon icon={item.icon} width={18} height={18} />
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.75rem 0" }} />
+          <div
+            style={{
+              height: "1px",
+              backgroundColor: "var(--divider)",
+              margin: "0.75rem 0",
+            }}
+          />
 
           {/* Auth links on mobile */}
-          {isLoggedIn ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          {user ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.25rem",
+              }}
+            >
               {[
-                { icon: "mdi:account-outline", label: "Profile",  path: "/user" },
-                { icon: "mdi:package-outline",  label: "Orders",   path: "/user/orders" },
-                { icon: "mdi:cog-outline",       label: "Settings", path: "/user/settings" },
+                {
+                  icon: "mdi:account-outline",
+                  label: "Profile",
+                  path: "/user",
+                },
+                {
+                  icon: "mdi:package-outline",
+                  label: "Orders",
+                  path: "/user/orders",
+                },
+                {
+                  icon: "mdi:cog-outline",
+                  label: "Settings",
+                  path: "/user/settings",
+                },
               ].map(({ icon, label, path }) => (
                 <button
                   key={label}
@@ -605,10 +897,12 @@ export default function Navbar() {
                     transition: "background-color 0.15s",
                   }}
                   onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "var(--muted-light)")
                   }
                   onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "transparent")
                   }
                 >
                   <Icon icon={icon} width={18} height={18} />
@@ -617,17 +911,40 @@ export default function Navbar() {
               ))}
             </div>
           ) : (
-            <div style={{ display: "flex", gap: "0.75rem", padding: "0 0.25rem" }}>
-              <button onClick={() => go("/auth/login")}  className="btn-outline" style={{ flex: 1, justifyContent: "center" }}>Login</button>
-              <button onClick={() => go("/auth/signup")} className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>Sign Up</button>
+            <div
+              style={{ display: "flex", gap: "0.75rem", padding: "0 0.25rem" }}
+            >
+              <button
+                onClick={() => go("/auth/login")}
+                className="btn-outline"
+                style={{ flex: 1, justifyContent: "center" }}
+              >
+                Login
+              </button>
+              <button
+                onClick={() => go("/auth/signup")}
+                className="btn-primary"
+                style={{ flex: 1, justifyContent: "center" }}
+              >
+                Sign Up
+              </button>
             </div>
           )}
 
-          <div style={{ height: "1px", backgroundColor: "var(--divider)", margin: "0.75rem 0" }} />
+          <div
+            style={{
+              height: "1px",
+              backgroundColor: "var(--divider)",
+              margin: "0.75rem 0",
+            }}
+          />
 
           {/* Theme toggle */}
           <button
-            onClick={() => { toggleTheme(); close(); }}
+            onClick={() => {
+              toggleTheme();
+              close();
+            }}
             style={{
               width: "100%",
               textAlign: "left",
@@ -645,21 +962,27 @@ export default function Navbar() {
               transition: "background-color 0.15s",
             }}
             onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--muted-light)")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "var(--muted-light)")
             }
             onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+              ((e.currentTarget as HTMLElement).style.backgroundColor =
+                "transparent")
             }
           >
             <Icon
-              icon={isDarkMode ? "mdi:white-balance-sunny" : "mdi:moon-waning-crescent"}
+              icon={
+                isDarkMode
+                  ? "mdi:white-balance-sunny"
+                  : "mdi:moon-waning-crescent"
+              }
               width={20}
               height={20}
             />
             {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           </button>
 
-          {isLoggedIn && (
+          {user && (
             <button
               onClick={handleLogout}
               style={{
@@ -680,10 +1003,12 @@ export default function Navbar() {
                 transition: "background-color 0.15s",
               }}
               onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "#fef2f2")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "#fef2f2")
               }
               onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor = "transparent")
+                ((e.currentTarget as HTMLElement).style.backgroundColor =
+                  "transparent")
               }
             >
               <Icon icon="mdi:logout" width={20} height={20} />
