@@ -3,34 +3,43 @@ const ErrorResponse = require('../utils/errorResponse');
 
 exports.changePassword = async (req, res, next) => {
   try {
-    const { oldPassword, newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
 
-    if (!oldPassword || !newPassword) {
-      return next(new ErrorResponse('Old password and new password are required', 400));
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return next(new ErrorResponse('Current password and new password are required', 400));
     }
 
-    if (newPassword.length < 6) {
-      return next(new ErrorResponse('New password must be at least 6 characters long', 400));
+    if (newPassword.length < 8) {
+      return next(new ErrorResponse('New password must be at least 8 characters long', 400));
     }
 
+    // Find user by ID from JWT middleware
     const user = await User.findById(req.user.id).select('+password');
 
     if (!user) {
       return next(new ErrorResponse('User not found', 404));
     }
 
-    const isMatch = await user.matchPassword(oldPassword);
+    // Compare current password with stored hashed password
+    const isMatch = await user.matchPassword(currentPassword);
 
     if (!isMatch) {
       return next(new ErrorResponse('Current password is incorrect', 400));
     }
 
-    user.password = newPassword;
+    // Hash new password with bcrypt (salt rounds 12 for better security)
+    const bcrypt = require('bcrypt');
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password
+    user.password = hashedPassword;
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: 'Password changed successfully'
+      message: 'Password updated successfully'
     });
   } catch (error) {
     next(error);

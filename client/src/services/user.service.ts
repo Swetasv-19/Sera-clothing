@@ -40,10 +40,11 @@ export const userService = {
     return handleResponse(response);
   },
 
-  deleteAccount: async (): Promise<ApiResponse> => {
+  deleteAccount: async (password: string): Promise<ApiResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/settings/account`, {
       method: "DELETE",
       headers: getAuthHeaders(),
+      body: JSON.stringify({ password }),
     });
     return handleResponse(response);
   },

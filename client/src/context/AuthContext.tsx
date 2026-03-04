@@ -15,7 +15,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +44,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initAuth();
+
+    // Cross-tab sync: handle token/user changes in other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        if (!e.newValue) {
+          // Logged out in another tab
+          setUser(null);
+        } else if (e.key === "user") {
+          // Logged in or updated in another tab
+          try {
+            setUser(JSON.parse(e.newValue));
+          } catch (err) {
+            console.error("Error parsing user from storage:", err);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = async (credentials: any) => {
@@ -66,7 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, isAdmin }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, logout, isAdmin }}
+    >
       {children}
     </AuthContext.Provider>
   );
