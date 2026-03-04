@@ -50,6 +50,34 @@ export default function AddressesSection() {
     );
   }
 
+  if (addresses.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[60vh] text-center animate-fadeIn">
+        <div className="space-y-4 opacity-70">
+          <div className="flex justify-center">
+            <Icon
+              icon="mdi:map-marker-outline"
+              width={40}
+              className="text-muted"
+            />
+          </div>
+
+          <h2 className="text-xl font-semibold text-foreground">
+            No addresses saved
+          </h2>
+
+          <p className="text-sm text-muted mb-6">
+            Add your shipping address to make checkout faster.
+          </p>
+
+          <button className="btn-outline text-sm px-5 py-2 mt-6 button-top-margin">
+            Add New Address
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fadeIn">
       <div className="dash-section-head flex items-end justify-between mb-6">
@@ -104,22 +132,6 @@ export default function AddressesSection() {
             </div>
           </div>
         ))}
-
-        {addresses.length === 0 && (
-          <div className="col-span-full card p-12 flex flex-col items-center justify-center text-center">
-            <Icon
-              icon="mdi:map-marker-outline"
-              width={48}
-              className="text-muted mb-4 opacity-50"
-            />
-            <h3 className="text-lg font-serif font-semibold text-foreground mb-2">
-              No addresses saved
-            </h3>
-            <p className="text-sm text-muted mb-6">
-              Add your shipping address to make checkout faster.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

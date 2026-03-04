@@ -37,18 +37,23 @@ export default function OrdersSection() {
 
   if (orders.length === 0) {
     return (
-      <div className="animate-fadeIn">
-        <div className="dash-section-head">
-          <h1 className="dash-section-title">My Orders</h1>
-          <p className="dash-section-sub">View and track your recent orders.</p>
-        </div>
+      <div className="flex items-center justify-center h-[60vh] text-center animate-fadeIn">
+        <div className="space-y-4 opacity-70">
+          <div className="flex justify-center">
+            <Icon icon="mdi:cart-outline" width={40} className="text-muted" />
+          </div>
 
-        <div className="py-4">
-          <h2 className="text-xl font-serif font-semibold text-foreground mb-2">
+          <h2 className="text-xl font-semibold text-foreground">
             No orders yet
           </h2>
-          <p className="text-muted mb-6">You haven't placed any orders yet.</p>
-          <button className="btn-primary">Shop Collections</button>
+
+          <p className="text-sm text-muted mb-6">
+            You haven't placed any orders yet.
+          </p>
+
+          <button className="btn-outline text-sm px-5 py-2 mt-6 button-top-margin">
+            Explore Products
+          </button>
         </div>
       </div>
     );

@@ -1,3 +1,5 @@
+"use client";
+
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { userService } from "@/services/user.service";
@@ -9,6 +11,11 @@ export default function SettingsSection() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [showPass, setShowPass] = useState({
+    current: false,
+    newPass: false,
+    confirm: false,
+  });
   const [loadingPass, setLoadingPass] = useState(false);
 
   const [preferences, setPreferences] = useState({
@@ -17,12 +24,19 @@ export default function SettingsSection() {
   });
   const [loadingPref, setLoadingPref] = useState(false);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [showDeletePass, setShowDeletePass] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passForm.newPassword !== passForm.confirmPassword) {
       return toast.error("New passwords do not match");
     }
-
+    if (passForm.newPassword.length < 8) {
+      return toast.error("Password must be at least 8 characters");
+    }
     setLoadingPass(true);
     try {
       const res = await userService.updatePassword({
@@ -48,9 +62,7 @@ export default function SettingsSection() {
     setLoadingPref(true);
     try {
       const res = await userService.updatePreferences(preferences);
-      if (res.success) {
-        toast.success("Preferences saved");
-      }
+      if (res.success) toast.success("Preferences saved");
     } catch (err: any) {
       toast.error(err.message || "Failed to save preferences");
     } finally {
@@ -59,181 +71,401 @@ export default function SettingsSection() {
   };
 
   const handleDeleteAccount = async () => {
-    if (
-      !confirm(
-        "WARNING: This action is irreversible. Are you sure you want to delete your account?",
-      )
-    )
-      return;
+    if (!deletePassword) return toast.error("Please enter your password");
+    setLoadingDelete(true);
     try {
-      const res = await userService.deleteAccount();
+      const res = await userService.deleteAccount(deletePassword);
       if (res.success) {
         toast.success("Account deleted");
-        // Typically, call authContext.logout() here or redirect to home page
         window.location.href = "/";
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to delete account");
+      toast.error(err.message || "Incorrect password");
+    } finally {
+      setLoadingDelete(false);
     }
   };
 
   return (
     <div className="animate-fadeIn">
-      <div className="dash-section-head mb-6">
-        <h1 className="dash-section-title">Account Settings</h1>
+      {/* Page Header */}
+      <div className="dash-section-head mb-8">
+        <h1 className="dash-section-title">Settings</h1>
         <p className="dash-section-sub">
-          Update your password and preferences.
+          Manage your account security and preferences.
         </p>
       </div>
 
-      <div className="flex flex-col gap-8">
-        {/* Password settings */}
-        <section className="card p-6">
-          <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2 mb-5">
-            <Icon icon="mdi:lock-outline" width={20} className="text-muted" />
-            Security & Password
-          </h2>
+      <div className="settings-stack">
+        {/* ── Password Section ─────────────────────────────────── */}
+        <div className="settings-card margin-top">
+          <div className="settings-card-header">
+            <div className="settings-card-icon">
+              <Icon icon="mdi:lock-outline" width={18} />
+            </div>
+            <div>
+              <h2 className="settings-card-title">Password & Security</h2>
+              <p className="settings-card-desc">
+                Update your login credentials.
+              </p>
+            </div>
+          </div>
 
-          <form
-            onSubmit={handlePasswordUpdate}
-            className="flex flex-col gap-4 max-w-md"
-          >
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted">
-                Current Password
+          <form onSubmit={handlePasswordUpdate} className="settings-form">
+            {/* Current Password */}
+            <div className="settings-field">
+              <label htmlFor="currentPw" className="settings-label">
+                Current password
               </label>
-              <input
-                type="password"
-                required
-                value={passForm.currentPassword}
-                onChange={(e) =>
-                  setPassForm({ ...passForm, currentPassword: e.target.value })
-                }
-                className="w-full p-2.5 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-md text-sm outline-none focus:border-[var(--accent-primary)] transition-colors text-[var(--foreground)]"
-                placeholder="Enter current password"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted">
-                New Password
-              </label>
-              <input
-                type="password"
-                required
-                value={passForm.newPassword}
-                onChange={(e) =>
-                  setPassForm({ ...passForm, newPassword: e.target.value })
-                }
-                className="w-full p-2.5 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-md text-sm outline-none focus:border-[var(--accent-primary)] transition-colors text-[var(--foreground)]"
-                placeholder="Enter new password"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                required
-                value={passForm.confirmPassword}
-                onChange={(e) =>
-                  setPassForm({ ...passForm, confirmPassword: e.target.value })
-                }
-                className="w-full p-2.5 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-md text-sm outline-none focus:border-[var(--accent-primary)] transition-colors text-[var(--foreground)]"
-                placeholder="Confirm new password"
-              />
+              <div className="settings-input-wrap">
+                <input
+                  id="currentPw"
+                  type={showPass.current ? "text" : "password"}
+                  required
+                  value={passForm.currentPassword}
+                  onChange={(e) =>
+                    setPassForm({
+                      ...passForm,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  className="settings-input"
+                  placeholder="Enter current password"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="settings-eye"
+                  onClick={() =>
+                    setShowPass((s) => ({ ...s, current: !s.current }))
+                  }
+                  aria-label={
+                    showPass.current ? "Hide password" : "Show password"
+                  }
+                >
+                  <Icon
+                    icon={showPass.current ? "mdi:eye-off" : "mdi:eye"}
+                    width={17}
+                  />
+                </button>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loadingPass}
-              className="btn-primary mt-2 self-start py-2 px-6"
-            >
-              {loadingPass ? "Updating..." : "Update Password"}
-            </button>
+            {/* New Password */}
+            <div className="settings-field">
+              <label htmlFor="newPw" className="settings-label">
+                New password
+              </label>
+              <div className="settings-input-wrap">
+                <input
+                  id="newPw"
+                  type={showPass.newPass ? "text" : "password"}
+                  required
+                  value={passForm.newPassword}
+                  onChange={(e) =>
+                    setPassForm({ ...passForm, newPassword: e.target.value })
+                  }
+                  className="settings-input"
+                  placeholder="At least 8 characters"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="settings-eye"
+                  onClick={() =>
+                    setShowPass((s) => ({ ...s, newPass: !s.newPass }))
+                  }
+                  aria-label={
+                    showPass.newPass ? "Hide password" : "Show password"
+                  }
+                >
+                  <Icon
+                    icon={showPass.newPass ? "mdi:eye-off" : "mdi:eye"}
+                    width={17}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="settings-field">
+              <label htmlFor="confirmPw" className="settings-label">
+                Confirm new password
+              </label>
+              <div className="settings-input-wrap">
+                <input
+                  id="confirmPw"
+                  type={showPass.confirm ? "text" : "password"}
+                  required
+                  value={passForm.confirmPassword}
+                  onChange={(e) =>
+                    setPassForm({
+                      ...passForm,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  className="settings-input"
+                  placeholder="Repeat new password"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="settings-eye"
+                  onClick={() =>
+                    setShowPass((s) => ({ ...s, confirm: !s.confirm }))
+                  }
+                  aria-label={
+                    showPass.confirm ? "Hide password" : "Show password"
+                  }
+                >
+                  <Icon
+                    icon={showPass.confirm ? "mdi:eye-off" : "mdi:eye"}
+                    width={17}
+                  />
+                </button>
+              </div>
+              {passForm.confirmPassword &&
+                passForm.newPassword !== passForm.confirmPassword && (
+                  <p className="settings-field-error">Passwords do not match</p>
+                )}
+            </div>
+
+            <div className="settings-form-actions">
+              <button
+                type="submit"
+                disabled={loadingPass}
+                className="settings-btn-primary"
+              >
+                {loadingPass ? (
+                  <>
+                    <Icon
+                      icon="mdi:loading"
+                      className="animate-spin"
+                      width={16}
+                    />
+                    Updating…
+                  </>
+                ) : (
+                  "Update password"
+                )}
+              </button>
+            </div>
           </form>
-        </section>
+        </div>
 
-        {/* Preferences */}
-        <section className="card p-6">
-          <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2 mb-5">
-            <Icon icon="mdi:bell-outline" width={20} className="text-muted" />
-            Notifications & Preferences
-          </h2>
+        {/* ── Notifications Section ────────────────────────────── */}
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <div className="settings-card-icon">
+              <Icon icon="mdi:bell-outline" width={18} />
+            </div>
+            <div>
+              <h2 className="settings-card-title">Notifications</h2>
+              <p className="settings-card-desc">Choose what you hear about.</p>
+            </div>
+          </div>
 
-          <div className="flex flex-col gap-5 max-w-lg">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <div className="font-semibold text-sm text-foreground mb-0.5">
-                  Order Updates
-                </div>
-                <div className="text-xs text-muted">
-                  Receive tracking and status updates via email.
-                </div>
+          <div className="settings-prefs">
+            <label className="settings-toggle-row" htmlFor="orderUpdates">
+              <div className="settings-toggle-info">
+                <span className="settings-toggle-title">Order updates</span>
+                <span className="settings-toggle-desc">
+                  Shipping and delivery status emails for your orders.
+                </span>
               </div>
-              <input
-                type="checkbox"
-                checked={preferences.orderUpdates}
-                onChange={(e) =>
-                  setPreferences({
-                    ...preferences,
-                    orderUpdates: e.target.checked,
-                  })
-                }
-                className="w-4 h-4 accent-[var(--accent-primary)]"
-              />
+              <div className="settings-toggle-wrap">
+                <input
+                  id="orderUpdates"
+                  type="checkbox"
+                  className="settings-toggle-input"
+                  checked={preferences.orderUpdates}
+                  onChange={(e) =>
+                    setPreferences({
+                      ...preferences,
+                      orderUpdates: e.target.checked,
+                    })
+                  }
+                />
+                <span className="settings-toggle-thumb" aria-hidden="true" />
+              </div>
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <div className="font-semibold text-sm text-foreground mb-0.5">
-                  Promotional Emails
-                </div>
-                <div className="text-xs text-muted">
-                  Get notified about exclusive offers and new collections.
-                </div>
+            <div className="settings-pref-divider" />
+
+            <label className="settings-toggle-row" htmlFor="promoEmails">
+              <div className="settings-toggle-info">
+                <span className="settings-toggle-title">
+                  Promotional emails
+                </span>
+                <span className="settings-toggle-desc">
+                  Exclusive offers, new arrivals, and seasonal sales.
+                </span>
               </div>
-              <input
-                type="checkbox"
-                checked={preferences.promoEmails}
-                onChange={(e) =>
-                  setPreferences({
-                    ...preferences,
-                    promoEmails: e.target.checked,
-                  })
-                }
-                className="w-4 h-4 accent-[var(--accent-primary)]"
-              />
+              <div className="settings-toggle-wrap">
+                <input
+                  id="promoEmails"
+                  type="checkbox"
+                  className="settings-toggle-input"
+                  checked={preferences.promoEmails}
+                  onChange={(e) =>
+                    setPreferences({
+                      ...preferences,
+                      promoEmails: e.target.checked,
+                    })
+                  }
+                />
+                <span className="settings-toggle-thumb" aria-hidden="true" />
+              </div>
             </label>
 
-            <button
-              onClick={handlePreferencesUpdate}
-              disabled={loadingPref}
-              className="btn-outline mt-2 self-start px-6 py-2 text-sm"
+            <div
+              className="settings-form-actions"
+              style={{ marginTop: "1.5rem" }}
             >
-              {loadingPref ? "Saving..." : "Save Preferences"}
+              <button
+                onClick={handlePreferencesUpdate}
+                disabled={loadingPref}
+                className="settings-btn-primary"
+              >
+                {loadingPref ? (
+                  <>
+                    <Icon
+                      icon="mdi:loading"
+                      className="animate-spin"
+                      width={16}
+                    />
+                    Saving…
+                  </>
+                ) : (
+                  "Save preferences"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Danger Zone ──────────────────────────────────────── */}
+        <div className="settings-card settings-card--danger">
+          <div className="settings-card-header">
+            <div className="settings-card-icon settings-card-icon--danger">
+              <Icon icon="mdi:alert-circle-outline" width={18} />
+            </div>
+            <div>
+              <h2 className="settings-card-title settings-card-title--danger">
+                Danger zone
+              </h2>
+              <p className="settings-card-desc">
+                Permanent and irreversible account actions.
+              </p>
+            </div>
+          </div>
+
+          <div className="settings-danger-body">
+            <div className="settings-danger-desc">
+              <p>
+                Deleting your account will permanently remove all your data
+                including orders, saved addresses, and preferences. This cannot
+                be undone.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="settings-btn-danger"
+            >
+              <Icon icon="mdi:trash-can-outline" width={16} />
+              Delete account
             </button>
           </div>
-        </section>
-
-        {/* Danger Zone */}
-        <section className="card p-6 border-red-500/20 bg-red-500/5 dark:bg-red-500/5">
-          <h2 className="text-lg font-serif font-semibold text-red-500 flex items-center gap-2 mb-2">
-            <Icon icon="mdi:alert-circle-outline" width={20} />
-            Danger Zone
-          </h2>
-          <p className="text-sm text-foreground/80 mb-5">
-            Once you delete your account, there is no going back. Please be
-            certain.
-          </p>
-          <button
-            onClick={handleDeleteAccount}
-            className="btn-primary !bg-red-500 hover:!bg-red-600 text-white"
-          >
-            Delete Account
-          </button>
-        </section>
+        </div>
       </div>
+
+      {/* ── Delete Confirmation Modal ─────────────────────────── */}
+      {showDeleteModal && (
+        <div
+          className="settings-modal-overlay"
+          onClick={() => {
+            setShowDeleteModal(false);
+            setDeletePassword("");
+            setShowDeletePass(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+        >
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="settings-modal-icon">
+              <Icon icon="mdi:alert-circle-outline" width={28} />
+            </div>
+            <h3 id="delete-modal-title" className="settings-modal-title">
+              Delete your account?
+            </h3>
+            <p className="settings-modal-desc">
+              This action is <strong>permanent</strong> and cannot be undone.
+              Enter your password to confirm.
+            </p>
+
+            {/* Password confirmation field */}
+            <div className="settings-modal-field">
+              <div className="settings-input-wrap">
+                <input
+                  type={showDeletePass ? "text" : "password"}
+                  className="settings-input"
+                  placeholder="Enter your password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleDeleteAccount()}
+                  autoFocus
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="settings-eye"
+                  onClick={() => setShowDeletePass((v) => !v)}
+                  aria-label={
+                    showDeletePass ? "Hide password" : "Show password"
+                  }
+                >
+                  <Icon
+                    icon={showDeletePass ? "mdi:eye-off" : "mdi:eye"}
+                    width={17}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="settings-modal-actions">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeletePassword("");
+                  setShowDeletePass(false);
+                }}
+                className="settings-btn-ghost"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={loadingDelete || !deletePassword}
+                className="settings-btn-danger"
+              >
+                {loadingDelete ? (
+                  <>
+                    <Icon
+                      icon="mdi:loading"
+                      className="animate-spin"
+                      width={16}
+                    />
+                    Deleting…
+                  </>
+                ) : (
+                  "Delete my account"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

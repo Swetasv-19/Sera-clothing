@@ -47,6 +47,31 @@ export default function WishlistSection() {
     );
   }
 
+  if (wishlist.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[60vh] text-center animate-fadeIn">
+        <div className="space-y-4 opacity-70">
+          <div className="flex justify-center">
+            <Icon icon="mdi:heart-outline" width={40} className="text-muted" />
+          </div>
+
+          <h2 className="text-xl font-semibold text-foreground">
+            Your wishlist is empty
+          </h2>
+
+          <p className="text-sm text-muted mb-6">
+            Save your favorite items here while you shop to easily find them
+            later.
+          </p>
+
+          <button className="btn-outline text-sm px-5 py-2 mt-6 button-top-margin">
+            Explore Products
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fadeIn">
       <div className="dash-section-head">
@@ -86,24 +111,6 @@ export default function WishlistSection() {
             </div>
           </div>
         ))}
-
-        {wishlist.length === 0 && (
-          <div className="col-span-full card p-12 flex flex-col items-center justify-center text-center">
-            <Icon
-              icon="mdi:heart-outline"
-              width={48}
-              className="text-muted mb-4 opacity-50"
-            />
-            <h3 className="text-lg font-serif font-semibold text-foreground mb-2">
-              Your wishlist is empty
-            </h3>
-            <p className="text-sm text-muted mb-6">
-              Save your favorite items here while you shop to easily find them
-              later.
-            </p>
-            <button className="btn-primary">Explore Products</button>
-          </div>
-        )}
       </div>
     </div>
   );
