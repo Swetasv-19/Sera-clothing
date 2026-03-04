@@ -73,3 +73,8 @@
   border-color: var(--foreground);
   background-color: var(--muted-light);
 }
+
+.margin-top,
+.button-top-margin {
+  margin-top: 1em;
+}
