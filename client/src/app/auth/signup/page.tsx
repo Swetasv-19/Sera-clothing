@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
+import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,10 +30,12 @@ export default function SignupPage() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Full name is required";
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) newErrors.email = "Valid email is required";
-    if (formData.password.length < 6) newErrors.password = "Minimum 6 characters";
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords match required";
-    
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+      newErrors.email = "Valid email is required";
+    if (formData.password.length < 6)
+      newErrors.password = "Minimum 6 characters";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -40,70 +43,88 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    
     setIsLoading(true);
     setErrors({});
-
     try {
       await signup({
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
+      toast.success("Account created successfully!");
       router.push("/");
     } catch (err: any) {
-      setErrors({ submit: err.message || "Something went wrong. Please try again." });
+      setErrors({
+        submit: err.message || "Something went wrong. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[var(--background)]">
-      <div className="w-full max-w-md">
-        <div className="rounded-2xl card p-8 sm:p-10 shadow-xl">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-serif font-bold mb-2 text-[var(--foreground)]">
-              Create Account
-            </h1>
-            <p className="text-[var(--muted)]">Start your style journey with Sera</p>
+    <div className="login-page">
+      {/* Ambient background orbs */}
+      <div className="login-bg-orb login-bg-orb--1" />
+      <div className="login-bg-orb login-bg-orb--2" />
+
+      <div className="login-card-wrapper">
+        {/* Brand mark */}
+        <div className="login-brand">
+          <span className="login-brand__name">Sera</span>
+        </div>
+
+        {/* Glass card */}
+        <div className="login-card">
+          <div className="login-card__header">
+            <div className="login-card__title">Create Account</div>
+            <p className="login-card__sub">
+              Start your style journey with Sera
+            </p>
           </div>
 
           {errors.submit && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-center gap-3">
-              <Icon icon="mdi:alert-circle-outline" width={20} />
-              {errors.submit}
+            <div className="login-error">
+              <Icon icon="mdi:alert-circle-outline" width={18} />
+              <span>{errors.submit}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1.5 text-[var(--foreground)]">
-                Full Name
-              </label>
-              <div className="relative">
+          <form onSubmit={handleSubmit} className="login-form">
+            {/* Full Name */}
+            <div className="login-field">
+              <label className="login-label">Full Name</label>
+              <div className="login-input-wrap">
+                <Icon
+                  icon="mdi:account-outline"
+                  className="login-input-icon"
+                  width={18}
+                />
                 <input
                   type="text"
                   name="name"
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
-                  className="w-full pl-11 pr-4 py-3 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all"
-                />
-                <Icon 
-                  icon="mdi:account-outline" 
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] w-5 h-5" 
+                  placeholder="Jane Doe"
+                  className="login-input"
+                  autoComplete="name"
                 />
               </div>
-              {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+              {errors.name && (
+                <p className="login-field-error">{errors.name}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1.5 text-[var(--foreground)]">
-                Email Address
-              </label>
-              <div className="relative">
+            {/* Email */}
+            <div className="login-field">
+              <label className="login-label">Email Address</label>
+              <div className="login-input-wrap">
+                <Icon
+                  icon="mdi:email-outline"
+                  className="login-input-icon"
+                  width={18}
+                />
                 <input
                   type="email"
                   name="email"
@@ -111,71 +132,93 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="name@example.com"
-                  className="w-full pl-11 pr-4 py-3 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all"
-                />
-                <Icon 
-                  icon="mdi:email-outline" 
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] w-5 h-5" 
+                  className="login-input"
+                  autoComplete="email"
                 />
               </div>
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p className="login-field-error">{errors.email}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1.5 text-[var(--foreground)]">
-                  Password
-                </label>
-                <div className="relative">
+            {/* Password pair */}
+            <div className="login-pw-pair">
+              <div className="login-field">
+                <label className="login-label">Password</label>
+                <div className="login-input-wrap">
+                  <Icon
+                    icon="mdi:lock-outline"
+                    className="login-input-icon"
+                    width={18}
+                  />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all font-mono"
+                    placeholder="••••••••"
+                    className="login-input"
+                    autoComplete="new-password"
                   />
-                  <Icon 
-                    icon="mdi:lock-outline" 
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] w-4 h-4" 
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="login-eye-btn"
+                    aria-label="Toggle password visibility"
+                  >
+                    <Icon
+                      icon={
+                        showPassword ? "mdi:eye-off-outline" : "mdi:eye-outline"
+                      }
+                      width={18}
+                    />
+                  </button>
                 </div>
-                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                {errors.password && (
+                  <p className="login-field-error">{errors.password}</p>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1.5 text-[var(--foreground)]">
-                  Confirm
-                </label>
-                <div className="relative">
+              <div className="login-field">
+                <label className="login-label">Confirm</label>
+                <div className="login-input-wrap">
+                  <Icon
+                    icon="mdi:lock-check-outline"
+                    className="login-input-icon"
+                    width={18}
+                  />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="confirmPassword"
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    placeholder="••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-[var(--surface-alt)] border border-[var(--divider)] rounded-lg text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all font-mono"
-                  />
-                  <Icon 
-                    icon="mdi:lock-check-outline" 
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] w-4 h-4" 
+                    placeholder="••••••••"
+                    className="login-input"
+                    autoComplete="new-password"
                   />
                 </div>
-                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && (
+                  <p className="login-field-error">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary py-3 flex justify-center items-center gap-2 mt-4"
+              className="login-submit"
+              style={{ marginTop: "0.5rem" }}
             >
               {isLoading ? (
                 <>
-                  <Icon icon="mdi:loading" className="animate-spin" width={20} />
-                  Creating Account...
+                  <Icon
+                    icon="mdi:loading"
+                    className="animate-spin"
+                    width={18}
+                  />
+                  Creating Account…
                 </>
               ) : (
                 "Create Account"
@@ -183,17 +226,12 @@ export default function SignupPage() {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-[var(--divider)] text-center">
-            <p className="text-[var(--muted)] text-sm">
-              Already have an account?{" "}
-              <Link
-                href="/auth/login"
-                className="text-[var(--accent-secondary)] font-bold hover:underline"
-              >
-                Log In
-              </Link>
-            </p>
-          </div>
+          <p className="login-footer-text">
+            Already have an account?{" "}
+            <Link href="/auth/login" className="login-signup-link">
+              Sign In
+            </Link>
+          </p>
         </div>
       </div>
     </div>
