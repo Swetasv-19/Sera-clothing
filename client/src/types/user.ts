@@ -3,6 +3,10 @@ export interface User {
   name: string;
   email: string;
   role: "user" | "admin";
+  createdAt?: string;
+  loyaltyPoints?: number;
+  orders?: any[];
+  wishlist?: any[];
 }
 
 export interface AuthResponse {
