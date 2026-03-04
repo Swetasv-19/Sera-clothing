@@ -13,7 +13,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/api/users', require('./routes/user'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/wishlist', require('./routes/wishlistRoutes'));
+app.use('/api/addresses', require('./routes/addressRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/products', require('./routes/products'));
 
 app.get('/favicon.ico', (req, res) => {
