@@ -3,15 +3,16 @@ import "./globals.css";
 import "./fonts.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import FooterConditional from "@/components/FooterConditional";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Sera Clothing – Premium Fashion",
   description:
     "Discover timeless elegance with Sera Clothing. Curated premium fashion for the modern wardrobe.",
 };
-
-import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -43,13 +44,18 @@ export default function RootLayout({
 
         <AuthProvider>
           <ThemeProvider>
+            <Toaster position="bottom-right" />
             {/* App shell: navbar → page content → footer */}
-            <div style={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100dvh",
+              }}
+            >
               <Navbar />
-              <main style={{ flex: 1 }}>
-                {children}
-              </main>
-              <Footer />
+              <main style={{ flex: 1 }}>{children}</main>
+              <FooterConditional />
             </div>
           </ThemeProvider>
         </AuthProvider>

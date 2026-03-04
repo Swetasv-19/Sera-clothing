@@ -14,7 +14,9 @@ const fallbackProducts: Product[] = [
     name: "Elegant Silk Blouse",
     description: "Premium silk blouse for special occasions",
     price: 89.99,
-    images: ["https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop"],
+    images: [
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop",
+    ],
     category: "women",
     isFeatured: true,
     isActive: true,
@@ -31,7 +33,9 @@ const fallbackProducts: Product[] = [
     description: "Handcrafted wool coat for winter",
     price: 249.99,
     discountPrice: 199.99,
-    images: ["https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop"],
+    images: [
+      "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop",
+    ],
     category: "women",
     isFeatured: true,
     isActive: true,
@@ -112,12 +116,14 @@ export default function Home() {
                   transition: "transform 0.2s ease, box-shadow 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                  (e.currentTarget as HTMLElement).style.transform =
+                    "translateY(-3px)";
                   (e.currentTarget as HTMLElement).style.boxShadow =
                     "0 8px 24px -4px rgba(0,0,0,0.1)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                  (e.currentTarget as HTMLElement).style.transform =
+                    "translateY(0)";
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
@@ -133,7 +139,7 @@ export default function Home() {
                     justifyContent: "center",
                   }}
                 >
-                  <span className="text-emerald-900">
+                  <span className="text-[var(--foreground)]">
                     <Icon icon={icon} width={22} height={22} />
                   </span>
                 </div>
@@ -148,7 +154,13 @@ export default function Home() {
                   >
                     {title}
                   </p>
-                  <p style={{ fontSize: "0.8rem", color: "var(--muted)", marginTop: "0.2rem" }}>
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--muted)",
+                      marginTop: "0.2rem",
+                    }}
+                  >
                     {sub}
                   </p>
                 </div>
@@ -159,7 +171,10 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="section-padding" style={{ backgroundColor: "var(--surface)" }}>
+      <section
+        className="section-padding"
+        style={{ backgroundColor: "var(--surface)" }}
+      >
         <div className="container-padded">
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
             <h2
@@ -179,7 +194,7 @@ export default function Home() {
               Handpicked premium pieces that define modern elegance
             </p>
           </div>
-          
+
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-900"></div>
