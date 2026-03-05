@@ -104,6 +104,64 @@ exports.updateUserStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Create user
+// @route   POST /api/admin/users
+// @access  Private/Admin
+exports.createUser = async (req, res, next) => {
+  try {
+    const { name, email, password, role, isActive } = req.body;
+
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return next(
+        new ErrorResponse("User already exists with that email", 400),
+      );
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: role || "user",
+      isActive: isActive !== undefined ? isActive : true,
+    });
+
+    res.status(201).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user
+// @route   PUT /api/admin/users/:id
+// @access  Private/Admin
+exports.updateUser = async (req, res, next) => {
+  try {
+    const { name, email, role, isActive, password } = req.body;
+
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return next(new ErrorResponse("User not found", 404));
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
+    if (password) {
+      user.password = password; // The pre-save hook handles hashing
+    }
+
+    await user.save();
+
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
 // @access  Private/Admin

@@ -42,6 +42,11 @@ app.use((err, req, res, next) => {
 
   console.error(err);
 
+  // Multer / Cloudinary generic errors
+  if (err.name === "MulterError") {
+    error.statusCode = 400;
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     message: error.message || "Server Error",

@@ -136,7 +136,7 @@ exports.getProductsByCategory = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// @desc    Create a product   (Admin only)
+// @desc    Create a product   (Admin only) - JSON body (legacy)
 // @route   POST /api/products
 // @access  Private / Admin
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,6 +145,89 @@ exports.createProduct = async (req, res, next) => {
     const product = await Product.create(req.body);
 
     res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @desc    Admin create product with images (Cloudinary + multipart/form-data)
+// @route   POST /api/admin/products
+// @access  Private / Admin
+// ─────────────────────────────────────────────────────────────────────────────
+exports.adminCreateProductWithImages = async (req, res, next) => {
+  try {
+    const {
+      name,
+      description,
+      price,
+      category,
+      stock,
+      discountPrice,
+      subCategory,
+      sizes,
+      colors,
+      sku,
+      brand,
+      tags,
+      isFeatured
+    } = req.body;
+
+    const files = req.files || [];
+    const imageUrls = files.map((file) => file.path).filter(Boolean);
+
+    // Coerce types from multipart/form-data (strings) into proper types
+    const toNumber = (value) => {
+      if (value === undefined || value === null || value === '') return undefined;
+      const num = Number(value);
+      return Number.isNaN(num) ? undefined : num;
+    };
+
+    const toBoolean = (value) => {
+      if (typeof value === 'boolean') return value;
+      if (value === undefined || value === null) return undefined;
+      const val = String(value).toLowerCase();
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      return undefined;
+    };
+
+    const toArrayFromCSV = (value) => {
+      if (!value) return undefined;
+      if (Array.isArray(value)) return value;
+      return String(value)
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
+    };
+
+    const productData = {
+      name,
+      description,
+      price: toNumber(price),
+      category,
+      stock: toNumber(stock),
+      discountPrice: toNumber(discountPrice),
+      subCategory,
+      sku,
+      brand,
+      isFeatured: toBoolean(isFeatured),
+      // Optional arrays
+      sizes: toArrayFromCSV(sizes),
+      colors: toArrayFromCSV(colors),
+      tags: toArrayFromCSV(tags)
+    };
+
+    if (imageUrls.length) {
+      productData.images = imageUrls;
+    }
+
+    const product = await Product.create(productData);
+
+    return res.status(201).json({
+      success: true,
+      product
+    });
   } catch (error) {
     next(error);
   }
