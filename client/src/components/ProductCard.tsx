@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { Product } from "../types/product";
 import { useCart } from "@/context/CartContext";
+import WishlistButton from "@/components/WishlistButton";
 import toast from "react-hot-toast";
 
 interface ProductCardProps {
@@ -159,6 +160,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </Link>
+
+        {/* Wishlist button — outside Link so it doesn't navigate */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "0.75rem",
+            right: "0.75rem",
+            zIndex: 3,
+          }}
+        >
+          <WishlistButton productId={product._id} size="sm" variant="default" />
+        </div>
       </div>
 
       {/* Card body */}
