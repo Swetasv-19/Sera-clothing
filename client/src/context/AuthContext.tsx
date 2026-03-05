@@ -37,7 +37,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setUser(null);
           }
         } catch (error) {
-          console.error("Auth init error:", error);
+          console.error(
+            "Auth init error:",
+            error instanceof Error ? error.message : error,
+          );
+          authService.logout();
+          setUser(null);
         }
       }
       setLoading(false);
