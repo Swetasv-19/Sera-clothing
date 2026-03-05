@@ -45,10 +45,12 @@
   cursor: pointer;
   white-space: nowrap;
 }
+
 .btn-secondary:hover {
   opacity: 0.85;
   transform: translateY(-1px);
 }
+
 .btn-secondary:active {
   transform: translateY(0);
 }
@@ -69,12 +71,9 @@
   cursor: pointer;
   white-space: nowrap;
 }
+
 .btn-outline:hover {
   border-color: var(--foreground);
   background-color: var(--muted-light);
 }
 
-.margin-top,
-.button-top-margin {
-  margin-top: 1em;
-}

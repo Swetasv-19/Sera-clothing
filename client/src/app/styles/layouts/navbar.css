@@ -1,2 +1,50 @@
 /* ─── Navbar Layout ─────────────────────────────────────────── */
 /* Navbar specific styles */
+
+.header-admin {
+  display: flex;
+  justify-content: space-between;
+  padding: 2em;
+}
+
+.margin-top,
+.button-top-margin {
+  margin-top: 1em;
+}
+
+.padding-small {
+  padding: 0.5em;
+}
+
+.padding-around {
+  padding: 1em;
+}
+
+.margin-top-lg {
+  margin-top: 2em;
+}
+
+.padding-around-s {
+  padding: 0.25em;
+}
+
+.text-big {
+  padding: 0.6em;
+  font-size: 2rem;
+}
+
+.input-box {
+  padding-left: 2.5em;
+}
+
+.margin-bottom {
+  margin-bottom: 2em;
+}
+
+.margin-bottom-s {
+  margin-bottom: 1.2em;
+}
+
+.padding-around-m {
+  padding: 0.4em;
+}

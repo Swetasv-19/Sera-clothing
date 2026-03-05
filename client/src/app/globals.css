@@ -6,6 +6,8 @@
   --foreground: #004643;
   --surface: #f0ede5;
   --surface-alt: #e8e4dc;
+  --surface-hover: rgba(0, 70, 67, 0.08);
+  --surface-active: rgba(0, 70, 67, 0.12);
 
   --navbar-bg: #f0ede5;
   --navbar-text: #004643;
@@ -31,6 +33,8 @@
   --foreground: #f0ede5;
   --surface: #162b2a;
   --surface-alt: #1e3635;
+  --surface-hover: rgba(240, 237, 229, 0.1);
+  --surface-active: rgba(240, 237, 229, 0.15);
 
   --navbar-bg: #1e3635;
   --navbar-text: #f0ede5;
