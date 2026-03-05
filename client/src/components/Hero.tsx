@@ -34,7 +34,8 @@ export default function Hero() {
             width: "clamp(200px, 35vw, 500px)",
             height: "clamp(200px, 35vw, 500px)",
             borderRadius: "50%",
-            background: "radial-gradient(circle, var(--muted-light) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, var(--muted-light) 0%, transparent 70%)",
             filter: "blur(40px)",
           }}
         />
@@ -46,7 +47,8 @@ export default function Hero() {
             width: "clamp(200px, 40vw, 600px)",
             height: "clamp(200px, 40vw, 600px)",
             borderRadius: "50%",
-            background: "radial-gradient(circle, var(--muted-light) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, var(--muted-light) 0%, transparent 70%)",
             filter: "blur(60px)",
           }}
         />
@@ -96,12 +98,6 @@ export default function Hero() {
             <button className="btn-primary">
               Shop Now
               <Icon icon="mdi:arrow-right" width={18} height={18} />
-            </button>
-          </Link>
-          <Link href="/collections">
-            <button className="btn-secondary">
-              View Collections
-              <Icon icon="mdi:grid" width={18} height={18} />
             </button>
           </Link>
         </div>
