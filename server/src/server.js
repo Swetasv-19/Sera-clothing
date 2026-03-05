@@ -20,6 +20,7 @@ app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/addresses", require("./routes/addressRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
 app.use("/api/products", require("./routes/products"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 app.get("/favicon.ico", (req, res) => {
   res.status(204).end();
