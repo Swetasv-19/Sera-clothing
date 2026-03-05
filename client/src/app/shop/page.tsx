@@ -152,7 +152,7 @@ export default function ShopPage() {
           </div>
 
           {/* Control Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between py-4 mb-6 min-h-[42px] z-[40]">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between py-4 mb-6 min-h-10.5 z-40">
             {/* Quick URL Filters */}
             <div className="flex flex-wrap gap-2">
               <button
