@@ -23,13 +23,13 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
       <div className="cart-summary__rows">
         <div className="cart-summary__row">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>₹{subtotal.toFixed(2)}</span>
         </div>
 
         <div className="cart-summary__row">
           <span>Estimated Shipping</span>
           <span className={shipping === 0 ? "cart-summary__free" : ""}>
-            {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+            {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
           </span>
         </div>
 
@@ -37,21 +37,20 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
           <div className="cart-summary__note">
             <Icon icon="mdi:truck-fast-outline" width={16} />
             <span>
-              Complimentary shipping on orders over ${SHIPPING_THRESHOLD}
+              Complimentary shipping on orders over ₹{SHIPPING_THRESHOLD}
             </span>
           </div>
         )}
 
         <div className="cart-summary__row">
-          <span>Estimated Tax</span>
-          <span>${tax.toFixed(2)}</span>
+          <span>₹{tax.toFixed(2)}</span>
         </div>
 
         <div className="cart-summary__divider" />
 
         <div className="cart-summary__row cart-summary__row--total">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>₹{total.toFixed(2)}</span>
         </div>
       </div>
 
