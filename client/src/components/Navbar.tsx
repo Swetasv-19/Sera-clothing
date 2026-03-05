@@ -16,9 +16,9 @@ const NAV_LINKS = [
     label: "Shop",
     dropdown: [
       {
-        href: "/collections",
-        label: "Collections",
-        icon: "mdi:layers-outline",
+        href: "/shop",
+        label: "Shop All",
+        icon: "mdi:store-outline",
       },
       { href: "/shop?new=true", label: "New Arrivals", icon: "mdi:sparkles" },
       { href: "/shop?sale=true", label: "Sale", icon: "mdi:sale-outline" },

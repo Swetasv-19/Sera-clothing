@@ -181,7 +181,7 @@ export default function Home() {
               className="font-serif text-3xl md:text-4xl font-bold"
               style={{ color: "var(--foreground)", marginBottom: "1rem" }}
             >
-              Featured Collection
+              Featured Products
             </h2>
             <p
               style={{

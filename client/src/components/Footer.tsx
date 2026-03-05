@@ -9,7 +9,7 @@ export default function Footer() {
   const links = {
     Shop: [
       { label: "All Products", href: "/shop" },
-      { label: "Collections", href: "/collections" },
+      { label: "Shop", href: "/shop" },
       { label: "New Arrivals", href: "/shop?sort=new" },
       { label: "Sale", href: "/shop?sale=1" },
     ],
