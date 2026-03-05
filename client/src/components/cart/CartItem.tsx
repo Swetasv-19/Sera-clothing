@@ -35,7 +35,7 @@ export default function CartItem({
           {item.variant && (
             <span className="cart-item__variant">{item.variant}</span>
           )}
-          <span className="cart-item__price">${item.price.toFixed(2)}</span>
+          <span className="cart-item__price">₹{item.price.toFixed(2)}</span>
         </div>
 
         <div className="cart-item__actions">
@@ -45,7 +45,7 @@ export default function CartItem({
           />
 
           <div className="cart-item__right">
-            <span className="cart-item__subtotal">${subtotal.toFixed(2)}</span>
+            <span className="cart-item__subtotal">₹{subtotal.toFixed(2)}</span>
             <button
               className="cart-item__remove"
               onClick={() => onRemove(item.id)}
