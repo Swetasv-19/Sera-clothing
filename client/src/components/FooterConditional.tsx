@@ -5,7 +5,9 @@ import Footer from "@/components/Footer";
 
 export default function FooterConditional() {
   const pathname = usePathname();
-  // Hide footer on all /auth/* pages
-  if (pathname?.startsWith("/auth")) return null;
+  // Hide footer on all /auth/* and /admin/* pages
+  if (pathname?.startsWith("/auth") || pathname?.startsWith("/admin"))
+    return null;
+
   return <Footer />;
 }

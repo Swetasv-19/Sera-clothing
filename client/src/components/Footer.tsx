@@ -9,28 +9,27 @@ export default function Footer() {
   const links = {
     Shop: [
       { label: "All Products", href: "/shop" },
-      { label: "Collections",  href: "/collections" },
+      { label: "Collections", href: "/collections" },
       { label: "New Arrivals", href: "/shop?sort=new" },
-      { label: "Sale",         href: "/shop?sale=1" },
+      { label: "Sale", href: "/shop?sale=1" },
     ],
     Company: [
       { label: "About Us", href: "/about" },
-      { label: "Contact",  href: "/contact" },
-      { label: "Blog",     href: "/blog" },
-      { label: "Careers",  href: "/careers" },
+      { label: "Blog", href: "/blog" },
+      { label: "Careers", href: "/careers" },
     ],
     Support: [
       { label: "Shipping & Returns", href: "/shipping" },
-      { label: "Size Guide",         href: "/size-guide" },
-      { label: "Product Care",       href: "/care" },
-      { label: "FAQ",                href: "/faq" },
+      { label: "Size Guide", href: "/size-guide" },
+      { label: "Product Care", href: "/care" },
+      { label: "FAQ", href: "/faq" },
     ],
   };
 
   const socials = [
     { icon: "mdi:instagram", href: "#", label: "Instagram" },
-    { icon: "mdi:twitter",   href: "#", label: "Twitter" },
-    { icon: "mdi:facebook",  href: "#", label: "Facebook" },
+    { icon: "mdi:twitter", href: "#", label: "Twitter" },
+    { icon: "mdi:facebook", href: "#", label: "Facebook" },
     { icon: "mdi:pinterest", href: "#", label: "Pinterest" },
   ];
 
@@ -42,7 +41,10 @@ export default function Footer() {
         marginTop: "auto",
       }}
     >
-      <div className="container-padded" style={{ paddingTop: "4rem", paddingBottom: "4rem" }}>
+      <div
+        className="container-padded"
+        style={{ paddingTop: "4rem", paddingBottom: "4rem" }}
+      >
         {/* Top grid */}
         <div
           style={{
@@ -54,7 +56,14 @@ export default function Footer() {
         >
           {/* Brand column */}
           <div style={{ gridColumn: "span 1" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                marginBottom: "1rem",
+              }}
+            >
               <div
                 style={{
                   width: "2.25rem",
@@ -66,17 +75,34 @@ export default function Footer() {
                   justifyContent: "center",
                 }}
               >
-                <Icon icon="mdi:clothing-store" width={20} height={20} style={{ color: "#FFF3E6" }} />
+                <Icon
+                  icon="mdi:clothing-store"
+                  width={20}
+                  height={20}
+                  style={{ color: "#FFF3E6" }}
+                />
               </div>
               <span
                 className="font-serif"
-                style={{ fontSize: "1.4rem", fontWeight: 700, color: "#FFF3E6" }}
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: 700,
+                  color: "#FFF3E6",
+                }}
               >
                 Sera
               </span>
             </div>
-            <p style={{ fontSize: "0.875rem", color: "rgba(255,243,230,0.65)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
-              Timeless elegance meets contemporary design. Premium fashion for the modern wardrobe.
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "rgba(255,243,230,0.65)",
+                lineHeight: 1.7,
+                marginBottom: "1.5rem",
+              }}
+            >
+              Timeless elegance meets contemporary design. Premium fashion for
+              the modern wardrobe.
             </p>
             {/* Socials */}
             <div style={{ display: "flex", gap: "0.75rem" }}>
@@ -98,10 +124,12 @@ export default function Footer() {
                     textDecoration: "none",
                   }}
                   onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,243,230,0.2)")
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "rgba(255,243,230,0.2)")
                   }
                   onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,243,230,0.1)")
+                    ((e.currentTarget as HTMLElement).style.backgroundColor =
+                      "rgba(255,243,230,0.1)")
                   }
                 >
                   <Icon icon={icon} width={16} height={16} />
@@ -125,7 +153,14 @@ export default function Footer() {
               >
                 {section}
               </h4>
-              <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+              <ul
+                style={{
+                  listStyle: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.65rem",
+                }}
+              >
                 {items.map(({ label, href }) => (
                   <li key={label}>
                     <Link
@@ -137,10 +172,12 @@ export default function Footer() {
                         transition: "color 0.2s",
                       }}
                       onMouseEnter={(e) =>
-                        ((e.currentTarget as HTMLElement).style.color = "#FFF3E6")
+                        ((e.currentTarget as HTMLElement).style.color =
+                          "#FFF3E6")
                       }
                       onMouseLeave={(e) =>
-                        ((e.currentTarget as HTMLElement).style.color = "rgba(255,243,230,0.65)")
+                        ((e.currentTarget as HTMLElement).style.color =
+                          "rgba(255,243,230,0.65)")
                       }
                     >
                       {label}
@@ -185,7 +222,8 @@ export default function Footer() {
                   ((e.currentTarget as HTMLElement).style.color = "#FFF3E6")
                 }
                 onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.color = "rgba(255,243,230,0.5)")
+                  ((e.currentTarget as HTMLElement).style.color =
+                    "rgba(255,243,230,0.5)")
                 }
               >
                 {label}
