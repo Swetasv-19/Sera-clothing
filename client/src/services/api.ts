@@ -18,7 +18,11 @@ export const getAuthHeaders = () => {
 export const handleResponse = async (response: Response) => {
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    const errorMessage =
+      data.message ||
+      data.error ||
+      `HTTP ${response.status}: ${response.statusText}`;
+    throw new Error(errorMessage);
   }
   return data;
 };
