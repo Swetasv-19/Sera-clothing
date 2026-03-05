@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+
 import { Icon } from "@iconify/react";
 import { useTheme } from "@/hooks/useTheme";
 import { useCart } from "@/context/CartContext";
@@ -23,12 +24,14 @@ const NAV_LINKS = [
       { href: "/shop?sale=true", label: "Sale", icon: "mdi:sale-outline" },
     ],
   },
-  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
 ] as const;
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isDarkMode, toggleTheme } = useTheme();
+
   const { user, logout } = useAuth();
 
   const { cartCount } = useCart();
@@ -80,7 +83,10 @@ export default function Navbar() {
   const dropdownHoverOut = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = "transparent");
 
+  if (pathname?.startsWith("/admin")) return null;
+
   /* ── Render ── */
+
   return (
     <nav
       style={{
