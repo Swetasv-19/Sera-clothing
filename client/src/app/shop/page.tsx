@@ -231,20 +231,77 @@ export default function ShopPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex justify-center mt-20 gap-3 pb-10">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => handleFilterChange({ page: i + 1 })}
-                        className={`w-12 h-12 rounded-full font-serif font-bold transition-all ${
-                          filters.page === i + 1
-                            ? "bg-(--foreground) text-(--background) scale-110 shadow-lg"
-                            : "bg-(--surface) text-(--foreground) border border-(--divider) hover:border-(--foreground)"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+                  <div className="flex justify-center items-center mt-20 gap-2 pb-10">
+                    {/* Prev */}
+                    <button
+                      disabled={filters.page === 1}
+                      onClick={() => {
+                        handleFilterChange({ page: (filters.page ?? 1) - 1 });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-(--surface) border border-(--divider) text-(--foreground) hover:border-(--foreground) transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Icon icon="mdi:chevron-left" className="w-5 h-5" />
+                    </button>
+
+                    {/* Page numbers with ellipsis */}
+                    {(() => {
+                      const current = filters.page ?? 1;
+                      const pages: (number | "...")[] = [];
+                      if (totalPages <= 7) {
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        pages.push(1);
+                        if (current > 3) pages.push("...");
+                        for (
+                          let i = Math.max(2, current - 1);
+                          i <= Math.min(totalPages - 1, current + 1);
+                          i++
+                        ) {
+                          pages.push(i);
+                        }
+                        if (current < totalPages - 2) pages.push("...");
+                        pages.push(totalPages);
+                      }
+
+                      return pages.map((p, idx) =>
+                        p === "..." ? (
+                          <span
+                            key={`ellipsis-${idx}`}
+                            className="w-10 h-10 flex items-center justify-center text-(--muted) text-sm select-none"
+                          >
+                            ···
+                          </span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => {
+                              handleFilterChange({ page: p as number });
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className={`w-10 h-10 rounded-full font-serif font-bold text-sm transition-all ${
+                              current === p
+                                ? "bg-(--foreground) text-(--background) scale-110 shadow-lg"
+                                : "bg-(--surface) text-(--foreground) border border-(--divider) hover:border-(--foreground)"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        ),
+                      );
+                    })()}
+
+                    {/* Next */}
+                    <button
+                      disabled={filters.page === totalPages}
+                      onClick={() => {
+                        handleFilterChange({ page: (filters.page ?? 1) + 1 });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-(--surface) border border-(--divider) text-(--foreground) hover:border-(--foreground) transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Icon icon="mdi:chevron-right" className="w-5 h-5" />
+                    </button>
                   </div>
                 )}
               </>

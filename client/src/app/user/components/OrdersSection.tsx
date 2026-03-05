@@ -90,7 +90,7 @@ export default function OrdersSection() {
             <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto mt-2 md:mt-0">
               <div className="text-left md:text-right">
                 <div className="font-semibold text-foreground mb-0.5">
-                  ${order.totalPrice?.toFixed(2) || "0.00"}
+                  ₹{order.totalPrice?.toFixed(2) || "0.00"}
                 </div>
                 <div
                   className={`text-xs font-semibold uppercase tracking-wider ${

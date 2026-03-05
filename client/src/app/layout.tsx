@@ -15,6 +15,25 @@ export const metadata: Metadata = {
     "Discover timeless elegance with Sera Clothing. Curated premium fashion for the modern wardrobe.",
 };
 
+// #region agent log
+fetch("http://127.0.0.1:7837/ingest/619b23d4-b5de-40ff-8149-9c1224eb1c8f", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-Debug-Session-Id": "8e44df",
+  },
+  body: JSON.stringify({
+    sessionId: "8e44df",
+    runId: "pre-fix",
+    hypothesisId: "H-css-before-layout",
+    location: "src/app/layout.tsx:beforeRootLayout",
+    message: "Reached RootLayout module evaluation (CSS successfully processed before this point)",
+    data: {},
+    timestamp: Date.now(),
+  }),
+}).catch(() => {});
+// #endregion agent log
+
 export default function RootLayout({
   children,
 }: Readonly<{

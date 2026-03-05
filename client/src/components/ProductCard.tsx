@@ -13,7 +13,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const hasDiscount =
     product.discountPrice && product.discountPrice < product.price;
-  const currentPrice = hasDiscount ? product.discountPrice : product.price;
+  const currentPrice = hasDiscount
+    ? (product.discountPrice ?? product.price)
+    : product.price;
   const discountPercentage = hasDiscount
     ? Math.round(
         ((product.price - product.discountPrice!) / product.price) * 100,
@@ -221,7 +223,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 color: "var(--foreground)",
               }}
             >
-              ${currentPrice?.toFixed(2)}
+              ₹{currentPrice?.toFixed(2)}
             </span>
             {hasDiscount && (
               <span
@@ -231,7 +233,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   color: "var(--muted)",
                 }}
               >
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </span>
             )}
           </div>

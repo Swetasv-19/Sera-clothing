@@ -90,7 +90,7 @@ export default function Home() {
               {
                 icon: "mdi:truck-delivery",
                 title: "Free Shipping",
-                sub: "On orders over $100",
+                sub: "On orders over ₹100",
               },
               {
                 icon: "mdi:shield-check",

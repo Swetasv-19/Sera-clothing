@@ -103,7 +103,7 @@ export default function WishlistSection() {
                 {item.name}
               </h3>
               <div className="text-[var(--accent-primary)] font-semibold mb-4">
-                ${item.price?.toFixed(2) || "0.00"}
+                ₹{item.price?.toFixed(2) || "0.00"}
               </div>
               <button className="btn-primary w-full justify-center py-2 text-sm">
                 Add to Cart
