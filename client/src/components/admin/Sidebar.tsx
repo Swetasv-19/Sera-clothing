@@ -34,68 +34,59 @@ const Sidebar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/admin/login";
+    window.location.href = "/";
   };
 
   return (
-    <div
-      className="w-64 border-r flex flex-col h-screen sticky top-0"
-      style={{
-        backgroundColor: "var(--surface)",
-        borderColor: "var(--divider)",
-      }}
-    >
-      <div className="p-6 border-b" style={{ borderColor: "var(--divider)" }}>
-        <span
-          className="text-2xl font-bold tracking-tight font-serif"
-          style={{ color: "var(--foreground)" }}
-        >
+    <aside className="w-60 shrink-0 h-screen flex flex-col border-r border-[var(--card-border)] bg-[var(--card-bg)] hidden md:flex transition-colors duration-300">
+      {/* Logo */}
+      <div className="h-16 shrink-0 flex items-center px-6 border-b border-[var(--card-border)]">
+        <span className="text-big text-xl font-bold tracking-tight text-[var(--foreground)]">
           SERA{" "}
-          <span style={{ color: "var(--muted)", fontWeight: 400 }}>ADMIN</span>
+          <span className="text-[var(--accent-primary)] font-medium">
+            ADMIN
+          </span>
         </span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
-                isActive ? "shadow-md" : "hover:bg-[rgba(0,0,0,0.05)]"
+              className={`margin-top padding-around flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 ease-in-out group ${
+                isActive
+                  ? "bg-[var(--surface-active)] text-[var(--foreground)] font-medium"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100 hover:bg-[var(--surface-hover)]"
               }`}
-              style={{
-                backgroundColor: isActive
-                  ? "var(--accent-primary)"
-                  : "transparent",
-                color: isActive ? "var(--background)" : "var(--foreground)",
-              }}
             >
-              <Icon icon={item.icon} className="text-xl" />
-              <span className="font-semibold text-sm">{item.name}</span>
+              <Icon
+                icon={item.icon}
+                className={`text-[18px] shrink-0 w-4 h-4 transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`}
+              />
+              <span>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t" style={{ borderColor: "var(--divider)" }}>
+      {/* Logout */}
+      <div className="px-3 py-4 border-t border-[var(--card-border)]">
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-3 p-3 w-full rounded-xl transition-colors duration-200"
-          style={{ color: "var(--accent-secondary)" }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "rgba(56, 25, 50, 0.05)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
+          className="margin-top-lg padding-around flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-[var(--muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-150 font-medium group"
         >
-          <Icon icon="material-symbols:logout" className="text-xl" />
-          <span className="font-bold text-sm">Logout</span>
+          <Icon
+            icon="material-symbols:logout"
+            className="text-[18px] shrink-0 group-hover:text-rose-500 transition-colors"
+          />
+          <span>Logout</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 };
 
