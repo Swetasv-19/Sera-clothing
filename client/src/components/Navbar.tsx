@@ -385,14 +385,19 @@ export default function Navbar() {
                         action: () => go("/user"),
                       },
                       {
+                        icon: "mdi:heart-outline",
+                        label: "Wishlist",
+                        action: () => go("/user?tab=wishlist"),
+                      },
+                      {
                         icon: "mdi:package-outline",
                         label: "Orders",
-                        action: () => go("/user/orders"),
+                        action: () => go("/user?tab=orders"),
                       },
                       {
                         icon: "mdi:cog-outline",
                         label: "Settings",
-                        action: () => go("/user/settings"),
+                        action: () => go("/user?tab=settings"),
                       },
                     ].map(({ icon, label, action }) => (
                       <button

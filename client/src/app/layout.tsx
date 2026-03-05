@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import FooterConditional from "@/components/FooterConditional";
 import { Toaster } from "react-hot-toast";
@@ -27,7 +28,8 @@ fetch("http://127.0.0.1:7837/ingest/619b23d4-b5de-40ff-8149-9c1224eb1c8f", {
     runId: "pre-fix",
     hypothesisId: "H-css-before-layout",
     location: "src/app/layout.tsx:beforeRootLayout",
-    message: "Reached RootLayout module evaluation (CSS successfully processed before this point)",
+    message:
+      "Reached RootLayout module evaluation (CSS successfully processed before this point)",
     data: {},
     timestamp: Date.now(),
   }),
@@ -64,21 +66,23 @@ export default function RootLayout({
 
         <AuthProvider>
           <CartProvider>
-            <ThemeProvider>
-              <Toaster position="bottom-right" />
-              {/* App shell: navbar → page content → footer */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: "100dvh",
-                }}
-              >
-                <Navbar />
-                <main style={{ flex: 1 }}>{children}</main>
-                <FooterConditional />
-              </div>
-            </ThemeProvider>
+            <WishlistProvider>
+              <ThemeProvider>
+                <Toaster position="bottom-right" />
+                {/* App shell: navbar → page content → footer */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: "100dvh",
+                  }}
+                >
+                  <Navbar />
+                  <main style={{ flex: 1 }}>{children}</main>
+                  <FooterConditional />
+                </div>
+              </ThemeProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

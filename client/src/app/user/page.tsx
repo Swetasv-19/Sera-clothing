@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 
@@ -12,11 +12,31 @@ import WishlistSection from "./components/WishlistSection";
 import AddressesSection from "./components/AddressesSection";
 import SettingsSection from "./components/SettingsSection";
 
+const VALID_TABS: TabType[] = [
+  "profile",
+  "orders",
+  "wishlist",
+  "addresses",
+  "settings",
+];
+
 export default function UserDashboard() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const tabParam = (searchParams?.get("tab") ?? null) as TabType | null;
+  const initialTab: TabType =
+    tabParam && VALID_TABS.includes(tabParam) ? tabParam : "profile";
+
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // If the URL ?tab param changes (e.g. back button), sync state
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   useEffect(() => {
     if (!loading && !user) router.push("/auth/login");

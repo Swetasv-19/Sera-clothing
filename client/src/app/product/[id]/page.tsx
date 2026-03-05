@@ -7,6 +7,7 @@ import { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { Icon } from "@iconify/react";
 import RelatedProducts from "@/components/product/RelatedProducts";
+import WishlistButton from "@/components/WishlistButton";
 
 export default function ProductPage() {
   const params = useParams();
@@ -247,6 +248,11 @@ export default function ProductPage() {
               >
                 Buy Now
               </button>
+              <WishlistButton
+                productId={product._id}
+                size="lg"
+                className="flex-shrink-0"
+              />
             </div>
           </div>
         </div>
