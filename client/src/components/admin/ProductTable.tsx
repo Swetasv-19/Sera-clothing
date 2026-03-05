@@ -55,61 +55,64 @@ const ProductTable = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md group">
+    <div className="margin-top padding-around bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] shadow-sm overflow-hidden transition-colors duration-300 block">
+      <div className="p-6 border-b border-[var(--card-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="margin-bottom-s relative flex-1 max-w-md group">
           <Icon
             icon="material-symbols:search"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] group-focus-within:text-[var(--accent-primary)] transition-colors"
           />
           <input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+            className="input-box padding-around-s w-full pl-10 pr-4 py-2 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all text-[var(--foreground)]"
           />
         </div>
 
         <button
           onClick={handleAdd}
-          className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-100"
+          className="margin-bottom-s padding-around-s flex items-center gap-2 px-5 py-2 text-sm font-semibold text-gray-300 bg-transparent border border-[var(--card-border)] hover:border-gray-500 hover:text-white rounded-md transition-all duration-200"
         >
-          <Icon icon="material-symbols:add" className="text-xl" />
+          <Icon
+            icon="material-symbols:add"
+            className="text-[18px] opacity-80"
+          />
           <span>Add Product</span>
         </button>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50/50">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-[var(--surface)]">
             <tr>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Product
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Category
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Price
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Stock
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Status
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider text-right">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider text-right border-b border-[var(--card-border)]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-[var(--card-border)]">
             {isLoading ? (
               [1, 2, 3, 4, 5].map((i) => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={6} className="px-6 py-8">
-                    <div className="h-6 bg-gray-100 rounded-lg w-full" />
+                  <td colSpan={6} className="px-6 py-6">
+                    <div className="h-6 bg-[var(--surface-alt)] rounded w-full" />
                   </td>
                 </tr>
               ))
@@ -117,7 +120,7 @@ const ProductTable = () => {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-6 py-12 text-center text-gray-400 font-medium"
+                  className="px-6 py-12 text-center text-[var(--muted)] font-medium"
                 >
                   No products found
                 </td>
@@ -126,11 +129,11 @@ const ProductTable = () => {
               products.map((product: any) => (
                 <tr
                   key={product._id}
-                  className="group hover:bg-gray-50/50 transition-colors"
+                  className="group hover:bg-[var(--surface-alt)] transition-colors"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
+                      <div className="w-12 h-12 rounded-lg bg-[var(--surface-alt)] flex-shrink-0 overflow-hidden border border-[var(--card-border)]">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
@@ -138,7 +141,7 @@ const ProductTable = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <div className="w-full h-full flex items-center justify-center text-[var(--muted)]">
                             <Icon
                               icon="material-symbols:image-outline"
                               className="text-xl"
@@ -147,26 +150,26 @@ const ProductTable = () => {
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-bold text-gray-900 leading-tight group-hover:text-black transition-colors">
+                        <span className="font-bold text-[var(--foreground)] leading-tight transition-colors">
                           {product.name}
                         </span>
-                        <span className="text-xs text-gray-400 uppercase tracking-tighter">
+                        <span className="text-xs text-[var(--muted)] uppercase tracking-tighter">
                           SKU: {product.sku || "N/A"}
                         </span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wider border border-gray-200/50">
+                    <span className="px-2.5 py-1 rounded-lg bg-[var(--surface-alt)] text-[var(--foreground)] text-[10px] font-bold uppercase tracking-wider border border-[var(--card-border)]">
                       {product.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-bold text-gray-900">
+                  <td className="px-6 py-4 font-bold text-[var(--foreground)]">
                     ₹{product.price.toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`font-semibold ${product.stock < 10 ? "text-rose-500" : "text-gray-600"}`}
+                      className={`font-semibold ${product.stock < 10 ? "text-rose-500" : "text-[var(--muted)]"}`}
                     >
                       {product.stock} pcs
                     </span>
@@ -174,9 +177,9 @@ const ProductTable = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <span
-                        className={`w-2 h-2 rounded-full ${product.isActive ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-gray-300"}`}
+                        className={`w-2 h-2 rounded-full ${product.isActive ? "bg-[var(--accent-primary)] shadow-[0_0_8px_var(--accent-primary)]" : "bg-[var(--muted-light)]"}`}
                       />
-                      <span className="text-xs font-semibold text-gray-600 capitalize">
+                      <span className="text-xs font-semibold text-[var(--muted)] capitalize">
                         {product.isActive ? "Active" : "Archived"}
                       </span>
                     </div>
@@ -185,22 +188,22 @@ const ProductTable = () => {
                     <div className="flex items-center justify-end space-x-2">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+                        className="p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-md transition-all duration-200 ease-in-out group"
                         title="Edit"
                       >
                         <Icon
                           icon="material-symbols:edit-outline"
-                          className="text-xl"
+                          className="text-xl shrink-0 w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200"
                         />
                       </button>
                       <button
                         onClick={() => handleDelete(product._id)}
-                        className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        className="p-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-md transition-all duration-200 ease-in-out group"
                         title="Delete"
                       >
                         <Icon
                           icon="material-symbols:delete-outline"
-                          className="text-xl"
+                          className="text-xl shrink-0 w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200"
                         />
                       </button>
                     </div>
@@ -214,26 +217,29 @@ const ProductTable = () => {
 
       {/* Pagination */}
       {!isLoading && totalPages > 1 && (
-        <div className="p-6 border-t border-gray-100 flex items-center justify-between">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="p-6 border-t border-[var(--card-border)] flex items-center justify-between bg-[var(--card-bg)]">
+          <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">
             Page {page} of {totalPages}
           </p>
           <div className="flex items-center space-x-2">
             <button
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 transition-all rounded-lg"
+              className="p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-md transition-all duration-200 ease-in-out disabled:opacity-30 group"
             >
-              <Icon icon="material-symbols:chevron-left" className="text-2xl" />
+              <Icon
+                icon="material-symbols:chevron-left"
+                className="text-2xl shrink-0 w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200"
+              />
             </button>
             <button
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 transition-all rounded-lg"
+              className="p-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-md transition-all duration-200 ease-in-out disabled:opacity-30 group"
             >
               <Icon
                 icon="material-symbols:chevron-right"
-                className="text-2xl"
+                className="text-2xl shrink-0 w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity duration-200"
               />
             </button>
           </div>

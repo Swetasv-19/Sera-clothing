@@ -40,50 +40,50 @@ const OrderTable = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "delivered":
-        return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
       case "shipped":
-        return "bg-blue-50 text-blue-600 border-blue-100";
+        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
       case "cancelled":
-        return "bg-rose-50 text-rose-600 border-rose-100";
+        return "bg-rose-500/10 text-rose-500 border-rose-500/20";
       case "processing":
-        return "bg-indigo-50 text-indigo-600 border-indigo-100";
+        return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
       default:
-        return "bg-amber-50 text-amber-600 border-amber-100";
+        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="margin-top padding-around bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] shadow-sm overflow-hidden transition-colors duration-300 block">
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50/50">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-[var(--surface)]">
             <tr>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Order
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Customer
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Items
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Total
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider border-b border-[var(--card-border)]">
                 Status
               </th>
-              <th className="px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-wider text-right">
+              <th className="px-6 py-4 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider text-right border-b border-[var(--card-border)]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-[var(--card-border)]">
             {isLoading ? (
               [1, 2, 3, 4, 5].map((i) => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={6} className="px-6 py-8">
-                    <div className="h-6 bg-gray-100 rounded-lg w-full" />
+                  <td colSpan={6} className="px-6 py-6">
+                    <div className="h-6 bg-[var(--surface-alt)] rounded w-full" />
                   </td>
                 </tr>
               ))
@@ -91,7 +91,7 @@ const OrderTable = () => {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-6 py-12 text-center text-gray-400 font-medium"
+                  className="margin-top px-6 py-12 text-center text-[var(--muted)] font-medium"
                 >
                   No orders found
                 </td>
@@ -100,41 +100,41 @@ const OrderTable = () => {
               orders.map((order: any) => (
                 <tr
                   key={order._id}
-                  className="group hover:bg-gray-50/50 transition-colors"
+                  className="group hover:bg-[var(--surface-alt)] transition-colors"
                 >
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-mono text-xs font-bold text-black uppercase tracking-tight">
+                      <span className="font-mono text-xs font-bold text-[var(--foreground)] uppercase tracking-tight">
                         #{order.orderId.slice(-6)}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
+                      <span className="text-[10px] text-[var(--muted)] font-medium uppercase tracking-widest">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-bold text-gray-900 leading-tight">
+                      <span className="font-bold text-[var(--foreground)] leading-tight">
                         {order.userId?.name || "Guest"}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-[var(--muted)]">
                         {order.userId?.email}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-700">
+                      <span className="text-sm font-bold text-[var(--foreground)]">
                         {order.items.length}{" "}
                         {order.items.length === 1 ? "Item" : "Items"}
                       </span>
-                      <span className="text-[10px] text-gray-400 line-clamp-1">
+                      <span className="text-[10px] text-[var(--muted)] line-clamp-1">
                         {order.items.map((i: any) => i.name).join(", ")}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-[var(--foreground)]">
                       ₹{order.totalPrice.toLocaleString()}
                     </span>
                   </td>
@@ -147,7 +147,7 @@ const OrderTable = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <select
-                      className="text-xs font-bold bg-white border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                      className="text-xs font-bold bg-[var(--background)] text-[var(--foreground)] border border-[var(--card-border)] rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all"
                       value={order.orderStatus}
                       onChange={(e) => updateStatus(order._id, e.target.value)}
                     >
@@ -167,22 +167,22 @@ const OrderTable = () => {
 
       {/* Pagination */}
       {!isLoading && totalPages > 1 && (
-        <div className="p-6 border-t border-gray-100 flex items-center justify-between">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="p-6 border-t border-[var(--card-border)] flex items-center justify-between bg-[var(--card-bg)]">
+          <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">
             Page {page} of {totalPages}
           </p>
           <div className="flex items-center space-x-2">
             <button
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 transition-all rounded-lg"
+              className="p-2 text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-alt)] disabled:opacity-30 transition-all rounded-lg"
             >
               <Icon icon="material-symbols:chevron-left" className="text-2xl" />
             </button>
             <button
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 text-gray-400 hover:text-black hover:bg-gray-50 disabled:opacity-30 transition-all rounded-lg"
+              className="p-2 text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-alt)] disabled:opacity-30 transition-all rounded-lg"
             >
               <Icon
                 icon="material-symbols:chevron-right"
