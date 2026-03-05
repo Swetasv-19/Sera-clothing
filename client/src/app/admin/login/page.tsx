@@ -13,6 +13,7 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const DURATION = 1000;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -40,18 +41,18 @@ const AdminLogin = () => {
 
       if (data.user.role !== "admin") {
         setError("Access denied: Admin privileges required");
-        toast.error("Access denied: Admin privileges required", { duration: 4000 });
+        toast.error("Access denied: Admin privileges required", { duration: DURATION });
         return;
       }
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      toast.success("Welcome back, Admin!", { duration: 4000 });
+      toast.success("Welcome back, Admin!", { duration: DURATION });
       router.push("/admin/dashboard");
     } catch (err: any) {
       const errMsg = err.response?.data?.message || "Invalid email or password";
       setError(errMsg);
-      toast.error(errMsg, { duration: 4000 });
+      toast.error(errMsg, { duration: DURATION });
     } finally {
       setIsLoading(false);
     }
