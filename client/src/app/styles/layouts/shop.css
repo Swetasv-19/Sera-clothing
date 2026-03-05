@@ -1,0 +1,252 @@
+/* ═══════════════════════════════════════════════════════════════
+   Shop Layout & Filter Sidebar
+   ═══════════════════════════════════════════════════════════════ */
+
+.shop-page {
+  background-color: var(--background);
+  min-height: 100dvh;
+}
+
+.shop-container {
+  max-width: 95rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 5rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* ── Filter Sidebar ─────────────────────────────────────────── */
+.shop-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 6.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.shop-side-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 7px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.08);
+}
+
+.shop-side-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shop-side-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shop-side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.shop-side-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.shop-side-item:hover {
+  background: var(--muted-light);
+  color: var(--foreground);
+  padding-left: 1rem;
+}
+
+.shop-side-item--active {
+  background: var(--muted-light);
+  color: var(--foreground);
+  font-weight: 600;
+  padding-left: 1rem;
+}
+
+.shop-side-item--active::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  width: 3px;
+  height: 1.25rem;
+  background: var(--accent-primary);
+  border-radius: 2px;
+}
+
+.shop-side-item--active {
+  position: relative;
+}
+
+/* Price range inputs */
+.shop-price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.shop-price-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shop-price-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.shop-price-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  font-size: 0.85rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.shop-price-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.shop-clear-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1.5px solid var(--divider);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shop-clear-btn:hover:not(:disabled) {
+  background: var(--muted-light);
+  color: var(--foreground);
+  border-color: var(--foreground);
+}
+
+.shop-clear-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* ── Mobile Sidebar Drawer ───────────────────────────────────── */
+@media (max-width: 1024px) {
+  .shop-sidebar {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    max-height: 85vh;
+  }
+}
+
+/* Animations */
+.shop-sidebar-open {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.shop-sidebar-closing {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@media (max-width: 1024px) {
+  .shop-sidebar-open {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .shop-sidebar-closing {
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}

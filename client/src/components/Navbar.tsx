@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { useTheme } from "@/hooks/useTheme";
+import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV_LINKS = [
@@ -30,57 +31,14 @@ export default function Navbar() {
   const { isDarkMode, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
 
+  const { cartCount } = useCart();
+
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const shopRef = useRef<HTMLDivElement>(null);
-
-  /* ── Init from localStorage ── */
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-
-    if (storedCart) {
-      try {
-        const cart = JSON.parse(storedCart);
-        setCartCount(
-          cart.reduce(
-            (s: number, i: { quantity: number }) => s + i.quantity,
-            0,
-          ),
-        );
-      } catch (e) {
-        console.error("Error parsing cart:", e);
-      }
-    }
-  }, []);
-
-  /* ── Cross-tab storage sync ── */
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === "cart") {
-        if (e.newValue) {
-          try {
-            const cart = JSON.parse(e.newValue);
-            setCartCount(
-              cart.reduce(
-                (s: number, i: { quantity: number }) => s + i.quantity,
-                0,
-              ),
-            );
-          } catch (err) {
-            console.error("Error parsing cart:", err);
-          }
-        } else {
-          setCartCount(0);
-        }
-      }
-    };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
 
   /* ── Click-outside closes dropdown ── */
   useEffect(() => {
@@ -345,32 +303,6 @@ export default function Navbar() {
             flexShrink: 0,
           }}
         >
-          {/* Search */}
-          <button
-            aria-label="Search"
-            style={{
-              padding: "0.5rem",
-              borderRadius: "0.4rem",
-              border: "none",
-              background: "transparent",
-              color: "var(--navbar-text)",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-              display: "flex",
-              alignItems: "center",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor =
-                "var(--muted-light)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor =
-                "transparent")
-            }
-          >
-            <Icon icon="mdi:magnify" width={20} height={20} />
-          </button>
-
           {/* User dropdown */}
           <div style={{ position: "relative" }} ref={dropdownRef}>
             <button
@@ -645,7 +577,7 @@ export default function Navbar() {
 
           {/* Cart */}
           <Link
-            href="/user/cart"
+            href="/cart"
             aria-label="Cart"
             style={{ position: "relative", display: "flex" }}
           >
