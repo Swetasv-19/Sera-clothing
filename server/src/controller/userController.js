@@ -33,6 +33,15 @@ exports.login = async (req, res, next) => {
       return next(new ErrorResponse("Invalid credentials", 401));
     }
 
+    if (!user.isActive) {
+      return next(
+        new ErrorResponse(
+          "Your account has been deactivated. Please contact support.",
+          403,
+        ),
+      );
+    }
+
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
@@ -56,8 +65,8 @@ exports.getMe = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
   } catch (error) {
     next(error);
@@ -71,13 +80,13 @@ exports.updateProfile = async (req, res, next) => {
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      return next(new ErrorResponse('User not found', 404));
+      return next(new ErrorResponse("User not found", 404));
     }
 
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return next(new ErrorResponse('Email already in use', 400));
+        return next(new ErrorResponse("Email already in use", 400));
       }
       user.email = email;
     }
@@ -95,8 +104,8 @@ exports.updateProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
   } catch (error) {
     next(error);
