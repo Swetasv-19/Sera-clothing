@@ -4,6 +4,7 @@ import "./fonts.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import FooterConditional from "@/components/FooterConditional";
 import { Toaster } from "react-hot-toast";
@@ -43,21 +44,23 @@ export default function RootLayout({
         />
 
         <AuthProvider>
-          <ThemeProvider>
-            <Toaster position="bottom-right" />
-            {/* App shell: navbar → page content → footer */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100dvh",
-              }}
-            >
-              <Navbar />
-              <main style={{ flex: 1 }}>{children}</main>
-              <FooterConditional />
-            </div>
-          </ThemeProvider>
+          <CartProvider>
+            <ThemeProvider>
+              <Toaster position="bottom-right" />
+              {/* App shell: navbar → page content → footer */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100dvh",
+                }}
+              >
+                <Navbar />
+                <main style={{ flex: 1 }}>{children}</main>
+                <FooterConditional />
+              </div>
+            </ThemeProvider>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>
