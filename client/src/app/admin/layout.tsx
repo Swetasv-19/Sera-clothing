@@ -14,7 +14,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!pathname) return;
 
-    // Skip auth check for login page
     if (pathname === "/admin/login") {
       setIsAuthorized(true);
       return;
@@ -50,19 +49,10 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthorized) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "var(--background)" }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-pulse flex flex-col items-center">
-          <div
-            className="w-12 h-12 rounded-full border-4 animate-spin mb-4"
-            style={{
-              borderColor: "var(--accent-primary)",
-              borderTopColor: "transparent",
-            }}
-          />
-          <p style={{ color: "var(--muted)", fontWeight: 500 }}>
+          <div className="w-12 h-12 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin mb-4" />
+          <p className="text-gray-500 font-medium">
             Verifying authorization...
           </p>
         </div>
@@ -70,12 +60,10 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If it's the login page, don't show sidebar and navbar
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  // Get active title from pathname
   const getPageTitle = () => {
     if (!pathname) return "Dashboard";
     const parts = pathname.split("/");
@@ -86,19 +74,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div
-      className="flex min-h-screen font-sans antialiased"
-      style={{
-        backgroundColor: "var(--background)",
-        color: "var(--foreground)",
-      }}
-    >
+    <div className="flex h-screen overflow-hidden font-sans antialiased bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
       <Toaster position="bottom-right" />
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0">
         <Navbar title={getPageTitle()} />
-        <main className="flex-1 p-8 pb-16 overflow-y-auto w-full">
-          {children}
+        <main className="flex-1 overflow-y-auto bg-[var(--surface)] flex justify-center">
+          <div className="w-full max-w-6xl px-10 py-10 space-y-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

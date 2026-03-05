@@ -22,145 +22,170 @@ const DashboardStats = () => {
     fetchStats();
   }, []);
 
-  if (isLoading)
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="h-32 bg-white rounded-2xl border border-gray-100 shadow-sm"
-          />
-        ))}
-      </div>
-    );
-
   const statCards = [
     {
       name: "Total Users",
-      value: stats?.totalUsers || 0,
+      value: stats?.totalUsers ?? "—",
       icon: "material-symbols:group-outline",
-      color: "blue",
+      description: "Registered accounts",
     },
     {
       name: "Total Products",
-      value: stats?.totalProducts || 0,
+      value: stats?.totalProducts ?? "—",
       icon: "material-symbols:shopping-bag-outline",
-      color: "emerald",
+      description: "Active in catalog",
     },
     {
       name: "Total Orders",
-      value: stats?.totalOrders || 0,
+      value: stats?.totalOrders ?? "—",
       icon: "material-symbols:list-alt-outline",
-      color: "amber",
+      description: "All time orders",
     },
     {
       name: "Total Sales",
-      value: `₹${stats?.totalSales?.toLocaleString() || 0}`,
+      value: stats ? `₹${stats.totalSales?.toLocaleString() || 0}` : "—",
       icon: "material-symbols:account-balance-wallet-outline",
-      color: "rose",
+      description: "Delivered revenue",
     },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
-          <div
-            key={stat.name}
-            className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">
-                  {stat.name}
-                </p>
-                <p className="text-2xl font-bold tracking-tight text-gray-900">
-                  {stat.value}
-                </p>
-              </div>
-              <div
-                className={`p-3 rounded-xl bg-${stat.color}-50 text-${stat.color}-500`}
-              >
-                <Icon icon={stat.icon} className="text-2xl" />
-              </div>
-            </div>
-          </div>
-        ))}
+    <div className="space-y-6">
+      {/* Page Header Card */}
+      <div className="margin-top padding-around bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl px-8 py-7 shadow-sm text-center">
+        <h3 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">
+          Dashboard Overview
+        </h3>
+        <p className="text-[var(--muted)] text-sm mt-1">
+          A snapshot of your store's performance today.
+        </p>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
-          <button className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
-            View All
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {isLoading
+          ? [1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-36 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl animate-pulse"
+              />
+            ))
+          : statCards.map((stat) => (
+              <div
+                key={stat.name}
+                className="margin-top-lg padding-around bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 shadow-sm flex flex-col items-center text-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <div className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[var(--surface-alt)] text-[var(--accent-primary)] border border-[var(--card-border)]">
+                  <Icon icon={stat.icon} className="text-[22px]" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-[var(--foreground)] tracking-tight leading-none">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest mt-2">
+                    {stat.name}
+                  </p>
+                  <p className="text-[10px] text-[var(--muted)] mt-0.5 opacity-60">
+                    {stat.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+      </div>
+
+      {/* Recent Transactions Card */}
+      <div className="margin-top-lg padding-around bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-[var(--card-border)] flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-semibold text-[var(--foreground)]">
+              Recent Transactions
+            </h4>
+            <p className="text-[10px] text-[var(--muted)] mt-0.5">
+              Last 5 orders placed
+            </p>
+          </div>
+          <button className="text-xs font-semibold text-[var(--accent-primary)] hover:opacity-70 transition-opacity px-3 py-1.5 rounded-lg cursor-pointer">
+            View all →
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="pb-4 pt-0 font-semibold text-gray-500 text-xs uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="pb-4 pt-0 font-semibold text-gray-500 text-xs uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="pb-4 pt-0 font-semibold text-gray-500 text-xs uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="pb-4 pt-0 font-semibold text-gray-500 text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="pb-4 pt-0 font-semibold text-gray-500 text-xs uppercase tracking-wider text-right">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {stats?.recentOrders?.map((order: any) => (
-                <tr
-                  key={order.orderId}
-                  className="group hover:bg-gray-50/50 transition-colors"
-                >
-                  <td className="py-5 font-mono text-xs text-gray-400">
-                    #{order.orderId.slice(-6)}
-                  </td>
-                  <td className="py-5">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 leading-tight">
-                        {order.userId?.name || "Guest"}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {order.userId?.email}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-5 font-bold text-gray-900 leading-none">
-                    ₹{order.totalPrice.toLocaleString()}
-                  </td>
-                  <td className="py-5">
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        order.orderStatus === "delivered"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : order.orderStatus === "cancelled"
-                            ? "bg-rose-50 text-rose-600"
-                            : "bg-amber-50 text-amber-600"
-                      }`}
-                    >
-                      {order.orderStatus}
-                    </span>
-                  </td>
-                  <td className="py-5 text-gray-500 text-sm font-medium text-right">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                </tr>
+          {isLoading ? (
+            <div className="p-6 space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="h-10 bg-[var(--surface-alt)] rounded-lg animate-pulse w-full"
+                />
               ))}
-            </tbody>
-          </table>
+            </div>
+          ) : !stats?.recentOrders?.length ? (
+            <div className="flex flex-col items-center justify-center py-16 text-[var(--muted)]">
+              <Icon
+                icon="material-symbols:receipt-long-outline"
+                className="text-4xl mb-3 opacity-40"
+              />
+              <p className="text-sm font-medium">No transactions yet</p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[var(--surface)]">
+                  {["Order ID", "Customer", "Amount", "Status", "Date"].map(
+                    (col, i) => (
+                      <th
+                        key={col}
+                        className={`px-6 py-3.5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest border-b border-[var(--card-border)] ${i === 4 ? "text-right" : ""}`}
+                      >
+                        {col}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--card-border)]">
+                {stats.recentOrders.map((order: any) => (
+                  <tr
+                    key={order._id}
+                    className="hover:bg-[var(--surface-alt)] transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm font-mono font-medium text-[var(--muted)]">
+                      #{order.orderId?.slice(-6) ?? "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-[var(--foreground)] leading-tight">
+                        {order.userId?.name || "Guest"}
+                      </p>
+                      <p className="text-xs text-[var(--muted)]">
+                        {order.userId?.email}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-[var(--foreground)]">
+                      ₹{order.totalPrice?.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                          order.orderStatus === "delivered"
+                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                            : order.orderStatus === "cancelled"
+                              ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                              : order.orderStatus === "shipped"
+                                ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                                : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                        }`}
+                      >
+                        {order.orderStatus}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[var(--muted)] text-right">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
