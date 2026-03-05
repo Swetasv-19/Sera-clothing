@@ -40,18 +40,18 @@ const AdminLogin = () => {
 
       if (data.user.role !== "admin") {
         setError("Access denied: Admin privileges required");
-        toast.error("Access denied: Admin privileges required");
+        toast.error("Access denied: Admin privileges required", { duration: 4000 });
         return;
       }
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      toast.success("Welcome back, Admin!");
+      toast.success("Welcome back, Admin!", { duration: 4000 });
       router.push("/admin/dashboard");
     } catch (err: any) {
       const errMsg = err.response?.data?.message || "Invalid email or password";
       setError(errMsg);
-      toast.error(errMsg);
+      toast.error(errMsg, { duration: 4000 });
     } finally {
       setIsLoading(false);
     }
