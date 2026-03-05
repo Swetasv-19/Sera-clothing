@@ -3,23 +3,62 @@
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { Product } from "../types/product";
+import { useCart } from "@/context/CartContext";
+import toast from "react-hot-toast";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+  const hasDiscount =
+    product.discountPrice && product.discountPrice < product.price;
   const currentPrice = hasDiscount ? product.discountPrice : product.price;
-  const discountPercentage = hasDiscount 
-    ? Math.round(((product.price - product.discountPrice!) / product.price) * 100)
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((product.price - product.discountPrice!) / product.price) * 100,
+      )
     : 0;
 
+  // Calculate if product is new (created within last 30 days)
+  const isNew = (() => {
+    if (!product.createdAt) return false;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return new Date(product.createdAt) > thirtyDaysAgo;
+  })();
+
+  const { addToCart } = useCart();
+  const isOutOfStock = product.stock <= 0;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isOutOfStock) return;
+
+    addToCart({
+      id: product._id, // By default we use the base product ID, if variants are implemented later we might append them
+      name: product.name,
+      price: currentPrice,
+      image: product.images[0] || "/placeholder-product.jpg",
+      quantity: 1,
+    });
+
+    // Show a success toast notification
+    toast.success(`${product.name} added to cart`, {
+      style: {
+        background: "var(--surface)",
+        color: "var(--foreground)",
+        border: "1px solid var(--divider)",
+      },
+      iconTheme: {
+        primary: "var(--accent-primary)",
+        secondary: "var(--surface)",
+      },
+    });
+  };
+
   return (
-    <div
-      className="card"
-      style={{ overflow: "hidden" }}
-    >
+    <div className="card" style={{ overflow: "hidden" }}>
       {/* Image area */}
       <div style={{ position: "relative", overflow: "hidden" }}>
         <Link href={`/product/${product._id}`} style={{ display: "block" }}>
@@ -41,34 +80,65 @@ export default function ProductCard({ product }: ProductCardProps) {
                 display: "block",
               }}
               onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLImageElement).style.transform = "scale(1.08)")
+                ((e.currentTarget as HTMLImageElement).style.transform =
+                  "scale(1.08)")
               }
               onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")
+                ((e.currentTarget as HTMLImageElement).style.transform =
+                  "scale(1)")
               }
             />
           </div>
 
-          {/* Badges */}
-          {product.isFeatured && (
-            <span
-              style={{
-                position: "absolute",
-                top: "0.75rem",
-                left: "0.75rem",
-                backgroundColor: "var(--accent-secondary)",
-                color: "#FFF3E6",
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                padding: "0.25rem 0.6rem",
-                borderRadius: "9999px",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              FEATURED
-            </span>
-          )}
+          {/* Badges Container */}
+          <div
+            style={{
+              position: "absolute",
+              top: "0.75rem",
+              left: "0.75rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
+              alignItems: "flex-start",
+            }}
+          >
+            {product.isFeatured && (
+              <span
+                style={{
+                  backgroundColor: "var(--accent-secondary)",
+                  color: "#FFF3E6",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "0.25rem 0.6rem",
+                  borderRadius: "9999px",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                FEATURED
+              </span>
+            )}
+
+            {isNew && (
+              <span
+                style={{
+                  backgroundColor: "var(--foreground)",
+                  color: "var(--background)",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "0.25rem 0.6rem",
+                  borderRadius: "9999px",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                NEW
+              </span>
+            )}
+          </div>
+
           {hasDiscount && (
             <span
               style={{
@@ -87,65 +157,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </Link>
-
-        {/* Quick actions overlay */}
-        <div
-          className="quick-actions"
-          style={{
-            position: "absolute",
-            bottom: "0.75rem",
-            left: "0.75rem",
-            right: "0.75rem",
-            display: "flex",
-            gap: "0.5rem",
-            opacity: 0,
-            transition: "opacity 0.25s ease",
-          }}
-        >
-          <Link
-            href={`/product/${product._id}`}
-            style={{
-              flex: 1,
-              padding: "0.5rem 0.5rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              backgroundColor: "var(--accent-primary)",
-              color: "var(--background)",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.35rem",
-              transition: "opacity 0.2s",
-              textDecoration: "none"
-            }}
-          >
-            <Icon icon="mdi:eye" width={15} height={15} />
-            View
-          </Link>
-          <button
-            style={{
-              flex: 1,
-              padding: "0.5rem 0.5rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              backgroundColor: "var(--accent-secondary)",
-              color: "#FFF3E6",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.35rem",
-            }}
-          >
-            <Icon icon="mdi:shopping-cart" width={15} height={15} />
-            Add
-          </button>
-        </div>
       </div>
 
       {/* Card body */}
@@ -164,7 +175,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.brand} | {product.category}
         </span>
 
-        <Link href={`/product/${product._id}`} style={{ textDecoration: "none" }}>
+        <Link
+          href={`/product/${product._id}`}
+          style={{ textDecoration: "none" }}
+        >
           <h3
             className="font-serif"
             style={{
@@ -197,7 +211,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             justifyContent: "space-between",
           }}
         >
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
+          <div
+            style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}
+          >
             <span
               style={{
                 fontSize: "1.1rem",
@@ -232,7 +248,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               transition: "color 0.2s",
             }}
             onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.color = "var(--accent-secondary)")
+              ((e.currentTarget as HTMLElement).style.color =
+                "var(--accent-secondary)")
             }
             onMouseLeave={(e) =>
               ((e.currentTarget as HTMLElement).style.color = "var(--muted)")
@@ -260,16 +277,56 @@ export default function ProductCard({ product }: ProductCardProps) {
               style={{ color: i < 4 ? "#eab308" : "var(--muted-light)" }}
             />
           ))}
-          <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginLeft: "0.25rem" }}>
+          <span
+            style={{
+              fontSize: "0.75rem",
+              color: "var(--muted)",
+              marginLeft: "0.25rem",
+            }}
+          >
             (4.0)
           </span>
         </div>
-      </div>
 
-      {/* Hover style for quick actions — injected via global styles */}
-      <style>{`
-        .card:hover .quick-actions { opacity: 1 !important; }
-      `}</style>
+        {/* Add to Cart Button (Always Visible) */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          style={{
+            width: "100%",
+            marginTop: "1.2rem",
+            padding: "0.65rem 0.5rem",
+            borderRadius: "0.5rem",
+            fontSize: "0.85rem",
+            fontWeight: 600,
+            backgroundColor: isOutOfStock ? "var(--surface)" : "transparent",
+            color: isOutOfStock ? "var(--muted)" : "var(--foreground)",
+            border: "1px solid transparent",
+            cursor: isOutOfStock ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.4rem",
+            transition: "border-color 0.2s ease, transform 0.1s ease",
+            opacity: isOutOfStock ? 0.7 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (isOutOfStock) return;
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--divider)";
+            (e.currentTarget as HTMLElement).style.transform =
+              "translateY(-2px)";
+          }}
+          onMouseLeave={(e) => {
+            if (isOutOfStock) return;
+            (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+            (e.currentTarget as HTMLElement).style.transform = "none";
+          }}
+        >
+          <Icon icon="mdi:shopping-cart-outline" width={18} height={18} />
+          {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+        </button>
+      </div>
     </div>
   );
 }
