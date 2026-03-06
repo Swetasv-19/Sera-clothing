@@ -27,9 +27,14 @@ export default function ProductModal({
     sku: "",
     brand: "Sera",
     isActive: true,
+    isCustomisable: false,
+    customisationPrice: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -43,7 +48,10 @@ export default function ProductModal({
         sku: product.sku || "",
         brand: product.brand || "Sera",
         isActive: product.isActive !== undefined ? product.isActive : true,
+        isCustomisable: product.isCustomisable || false,
+        customisationPrice: product.customisationPrice || "",
       });
+      setExistingImages(product.images || []);
     } else {
       setFormData({
         name: "",
@@ -55,8 +63,13 @@ export default function ProductModal({
         sku: "",
         brand: "Sera",
         isActive: true,
+        isCustomisable: false,
+        customisationPrice: "",
       });
+      setExistingImages([]);
     }
+    setImageFiles([]);
+    setImagePreviews([]);
     setError("");
   }, [product, isOpen]);
 
@@ -74,6 +87,32 @@ export default function ProductModal({
     }));
   };
 
+  const handleImageSelect = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files).slice(0, 5 - imageFiles.length);
+    const validFiles = newFiles.filter(
+      (f) =>
+        ["image/jpeg", "image/png", "image/webp"].includes(f.type) &&
+        f.size <= 5 * 1024 * 1024,
+    );
+    if (validFiles.length === 0) return;
+    setImageFiles((prev) => [...prev, ...validFiles]);
+    setImagePreviews((prev) => [
+      ...prev,
+      ...validFiles.map((f) => URL.createObjectURL(f)),
+    ]);
+  };
+
+  const removeNewImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -81,9 +120,23 @@ export default function ProductModal({
 
     try {
       if (product?._id) {
-        await api.put(`/products/${product._id}`, formData);
+        // Edit: JSON PUT, include updated existing images
+        await api.put(`/products/${product._id}`, {
+          ...formData,
+          images: existingImages,
+        });
       } else {
-        await api.post("/products", formData);
+        // Create: multipart FormData to admin route
+        const fd = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value !== "" && value !== null && value !== undefined) {
+            fd.append(key, String(value));
+          }
+        });
+        imageFiles.forEach((file) => fd.append("images", file));
+        await api.post("/admin/products", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
       onSuccess();
       onClose();
@@ -168,6 +221,93 @@ export default function ProductModal({
                 />
               </div>
 
+              {/* Image Upload */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wider">
+                  Product Images
+                </label>
+
+                {/* Existing images (edit mode) */}
+                {existingImages.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mb-2">
+                    {existingImages.map((url, idx) => (
+                      <div
+                        key={url}
+                        className="relative w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] group"
+                      >
+                        <img
+                          src={url}
+                          alt={`Product ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(idx)}
+                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          <Icon
+                            icon="material-symbols:close"
+                            className="text-white text-xl"
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* New image previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mb-2">
+                    {imagePreviews.map((src, idx) => (
+                      <div
+                        key={src}
+                        className="relative w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] group"
+                      >
+                        <img
+                          src={src}
+                          alt={`New ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeNewImage(idx)}
+                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          <Icon
+                            icon="material-symbols:close"
+                            className="text-white text-xl"
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload zone */}
+                {existingImages.length + imageFiles.length < 5 && (
+                  <label className="flex flex-col items-center justify-center w-full h-28 rounded-xl border-2 border-dashed border-[var(--card-border)] hover:border-[var(--accent-primary)] bg-[var(--surface-alt)] cursor-pointer transition-all group">
+                    <Icon
+                      icon="material-symbols:cloud-upload"
+                      className="text-2xl text-[var(--muted)] group-hover:text-[var(--accent-primary)] transition-colors mb-1"
+                    />
+                    <span className="text-xs font-semibold text-[var(--muted)] group-hover:text-[var(--foreground)] transition-colors">
+                      Click to upload images
+                    </span>
+                    <span className="text-[10px] text-[var(--muted)] mt-0.5 opacity-60">
+                      JPG, PNG, WebP · Max 5MB each · Up to{" "}
+                      {5 - existingImages.length - imageFiles.length} more
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => handleImageSelect(e.target.files)}
+                    />
+                  </label>
+                )}
+              </div>
+
               {/* Price */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wider">
@@ -185,7 +325,7 @@ export default function ProductModal({
                     onChange={handleChange}
                     required
                     min="0"
-                    className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                    className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                     placeholder="0.00"
                   />
                 </div>
@@ -255,7 +395,7 @@ export default function ProductModal({
                     onChange={handleChange}
                     required
                     min="0"
-                    className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                    className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                     placeholder="0"
                   />
                 </div>
@@ -276,7 +416,7 @@ export default function ProductModal({
                     name="sku"
                     value={formData.sku}
                     onChange={handleChange}
-                    className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium uppercase"
+                    className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium uppercase"
                     placeholder="Enter SKU"
                   />
                 </div>
@@ -297,14 +437,14 @@ export default function ProductModal({
                     name="brand"
                     value={formData.brand}
                     onChange={handleChange}
-                    className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                    className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                     placeholder="e.g. Sera"
                   />
                 </div>
               </div>
 
               {/* Is Active Toggle */}
-              <div className="md:col-span-2 flex items-center gap-3 p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--card-border)] shrink-0">
+              <div className="padding-around md:col-span-2 flex items-center gap-3 p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--card-border)] shrink-0">
                 <div className="flex-1">
                   <h4 className="text-sm font-bold text-[var(--foreground)]">
                     Product Status
@@ -327,6 +467,59 @@ export default function ProductModal({
                   </span>
                 </label>
               </div>
+
+              {/* Customisation Toggle */}
+              <div className="padding-around md:col-span-2 flex items-center gap-3 p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--card-border)] shrink-0">
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                    Customisation
+                  </h4>
+                  <p className="text-xs text-[var(--muted)] mt-0.5">
+                    Allow customers to upload their own image on this product
+                  </p>
+                </div>
+                <label className="inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    name="isCustomisable"
+                    checked={formData.isCustomisable}
+                    onChange={handleChange}
+                    className="sr-only peer"
+                  />
+                  <div className="relative w-11 h-6 shrink-0 bg-[var(--muted)]/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--accent-primary)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--card-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--accent-primary)]"></div>
+                  <span className="ml-3 text-sm font-bold w-12 text-left text-[var(--foreground)] whitespace-nowrap">
+                    {formData.isCustomisable ? "On" : "Off"}
+                  </span>
+                </label>
+              </div>
+
+              {/* Customisation Price — only shown when customisation is ON */}
+              {formData.isCustomisable && (
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wider">
+                    Customisation Price (₹)
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      icon="material-symbols:palette-outline"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]"
+                    />
+                    <input
+                      type="number"
+                      name="customisationPrice"
+                      value={formData.customisationPrice}
+                      onChange={handleChange}
+                      min="0"
+                      className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                      placeholder="Price when customer chooses customisation"
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--muted)] mt-0.5">
+                    This price is used when the customer selects the customised
+                    option
+                  </p>
+                </div>
+              )}
             </div>
           </form>
         </div>
@@ -336,7 +529,7 @@ export default function ProductModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-[var(--foreground)] bg-transparent hover:bg-[var(--surface)] border border-[var(--card-border)] rounded-xl transition-all duration-200"
+            className="padding-around-s text-sm font-bold text-[var(--foreground)] bg-transparent hover:bg-[var(--surface)] border border-[var(--card-border)] rounded-xl transition-all duration-200"
           >
             Cancel
           </button>
@@ -352,7 +545,7 @@ export default function ProductModal({
                 <span>Saving...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="padding-around-s flex items-center gap-2">
                 <Icon
                   icon="material-symbols:save-outline"
                   className="text-lg"

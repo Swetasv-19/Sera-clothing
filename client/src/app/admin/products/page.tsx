@@ -11,7 +11,7 @@ const AdminProducts = () => {
         <h3 className="text-xl font-semibold text-(--foreground) tracking-tight">
           Products Inventory
         </h3>
-        <p className="text-[var(--muted)] text-sm mt-1">
+        <p className="text-(--muted) text-sm mt-1">
           Manage your catalog, prices, and stock levels.
         </p>
       </div>

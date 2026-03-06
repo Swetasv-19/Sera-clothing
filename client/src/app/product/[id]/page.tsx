@@ -19,6 +19,9 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>("");
+  const [customImage, setCustomImage] = useState<string | null>(null);
+  const [customImageFile, setCustomImageFile] = useState<File | null>(null);
+  const [customisationSelected, setCustomisationSelected] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -76,14 +79,22 @@ export default function ProductPage() {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const activePrice =
+    customisationSelected && product.customisationPrice
+      ? product.customisationPrice
+      : product.discountPrice || product.price;
+
   const handleAddToCart = () => {
     addToCart({
-      id: `${product._id}-${selectedSize || "nosize"}`,
-      name: product.name,
-      price: product.discountPrice || product.price,
+      id: `${product._id}-${selectedSize || "nosize"}${customisationSelected ? "-custom" : ""}`,
+      name: customisationSelected
+        ? `${product.name} (Customised)`
+        : product.name,
+      price: activePrice,
       image: images[0],
       quantity: 1,
       variant: selectedSize || undefined,
+      ...(customisationSelected && customImage ? { customImage } : {}),
     });
   };
 
@@ -185,15 +196,70 @@ export default function ProductPage() {
             {/* Price */}
             <div className="flex items-end gap-4 mb-8">
               <span className="text-3xl sm:text-4xl font-bold text-(--foreground)">
-                ₹{product.discountPrice || product.price}
+                ₹{activePrice}
               </span>
-              {product.discountPrice &&
+              {!customisationSelected &&
+                product.discountPrice &&
                 product.discountPrice < product.price && (
                   <span className="text-xl sm:text-2xl text-(--muted) line-through mb-1">
                     ₹{product.price}
                   </span>
                 )}
+              {customisationSelected && (
+                <span className="text-sm font-semibold text-(--muted) mb-1">
+                  Customised
+                </span>
+              )}
             </div>
+
+            {/* Standard / Customised Selector */}
+            {product.isCustomisable && (
+              <div className="mb-8">
+                <h3 className="text-sm font-bold text-(--foreground) uppercase tracking-widest mb-4 opacity-80">
+                  Choose Option
+                </h3>
+                <div className="flex rounded-xl overflow-hidden border-2 border-(--divider)">
+                  <button
+                    onClick={() => {
+                      setCustomisationSelected(false);
+                      if (customImage) URL.revokeObjectURL(customImage);
+                      setCustomImage(null);
+                      setCustomImageFile(null);
+                    }}
+                    className={`flex-1 py-3 px-4 text-sm font-bold transition-all cursor-pointer ${
+                      !customisationSelected
+                        ? "bg-(--foreground) text-(--background)"
+                        : "bg-transparent text-(--foreground) hover:bg-(--surface)"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>Standard</span>
+                      <span className="text-xs font-semibold opacity-70">
+                        ₹{product.discountPrice || product.price}
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setCustomisationSelected(true)}
+                    className={`flex-1 py-3 px-4 text-sm font-bold transition-all cursor-pointer border-l-2 border-(--divider) ${
+                      customisationSelected
+                        ? "bg-(--foreground) text-(--background)"
+                        : "bg-transparent text-(--foreground) hover:bg-(--surface)"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>Customised</span>
+                      <span className="text-xs font-semibold opacity-70">
+                        ₹
+                        {product.customisationPrice ||
+                          product.discountPrice ||
+                          product.price}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="w-full h-px bg-(--divider) mb-8" />
 
@@ -230,6 +296,84 @@ export default function ProductPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Customisation Upload */}
+            {product.isCustomisable && customisationSelected && (
+              <div className="mb-12">
+                <h3 className="text-sm font-bold text-(--foreground) uppercase tracking-widest mb-4 opacity-80 flex items-center gap-2">
+                  <Icon icon="mdi:palette-outline" className="w-5 h-5" />
+                  Customise Your Design
+                </h3>
+                {!customImage ? (
+                  <label
+                    htmlFor="custom-image-upload"
+                    className="flex flex-col items-center justify-center w-full h-40 rounded-2xl border-2 border-dashed border-(--divider) hover:border-(--foreground) bg-(--surface)/50 cursor-pointer transition-all duration-300 group"
+                  >
+                    <Icon
+                      icon="mdi:cloud-upload-outline"
+                      className="w-10 h-10 text-(--muted) group-hover:text-(--foreground) transition-colors mb-2"
+                    />
+                    <span className="text-sm font-semibold text-(--muted) group-hover:text-(--foreground) transition-colors">
+                      Click to upload your image
+                    </span>
+                    <span className="text-xs text-(--muted) mt-1 opacity-60">
+                      PNG, JPG up to 5MB
+                    </span>
+                    <input
+                      id="custom-image-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert("File size must be under 5MB");
+                            return;
+                          }
+                          setCustomImageFile(file);
+                          setCustomImage(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                ) : (
+                  <div className="relative w-full flex items-center gap-4 p-4 rounded-2xl bg-(--surface)/50 border border-(--divider)">
+                    <div className="w-28 h-28 rounded-xl overflow-hidden border border-(--divider) flex-shrink-0">
+                      <img
+                        src={customImage}
+                        alt="Your custom design"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-(--foreground)">
+                        {customImageFile?.name}
+                      </p>
+                      <p className="text-xs text-(--muted) mt-0.5">
+                        {customImageFile &&
+                          (customImageFile.size / 1024).toFixed(1)}{" "}
+                        KB
+                      </p>
+                      <button
+                        onClick={() => {
+                          if (customImage) URL.revokeObjectURL(customImage);
+                          setCustomImage(null);
+                          setCustomImageFile(null);
+                        }}
+                        className="mt-3 flex items-center gap-1.5 text-xs font-bold text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                      >
+                        <Icon
+                          icon="mdi:trash-can-outline"
+                          className="w-4 h-4"
+                        />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

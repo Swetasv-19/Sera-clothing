@@ -13,6 +13,8 @@ export interface Product {
   brand: string;
   isFeatured: boolean;
   isActive: boolean;
+  isCustomisable?: boolean;
+  customisationPrice?: number;
   createdAt: string;
   updatedAt: string;
 }

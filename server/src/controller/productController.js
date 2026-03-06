@@ -1,5 +1,5 @@
-const Product = require('../models/Product');
-const ErrorResponse = require('../utils/errorResponse');
+const Product = require("../models/Product");
+const ErrorResponse = require("../utils/errorResponse");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // @desc    Get all products  (with filtering, sorting, pagination & search)
@@ -16,15 +16,15 @@ exports.getProducts = async (req, res, next) => {
       colors,
       isFeatured,
       search,
-      sort = '-createdAt',
+      sort = "-createdAt",
       page = 1,
-      limit = 12
+      limit = 12,
     } = req.query;
 
     const filter = { isActive: true };
 
     if (category) filter.category = category.toLowerCase();
-    if (isFeatured !== undefined) filter.isFeatured = isFeatured === 'true';
+    if (isFeatured !== undefined) filter.isFeatured = isFeatured === "true";
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       filter.price = {};
@@ -33,12 +33,12 @@ exports.getProducts = async (req, res, next) => {
     }
 
     if (sizes) {
-      const sizeArr = sizes.split(',').map((s) => s.trim());
+      const sizeArr = sizes.split(",").map((s) => s.trim());
       filter.sizes = { $in: sizeArr };
     }
 
     if (colors) {
-      const colorArr = colors.split(',').map((c) => c.trim());
+      const colorArr = colors.split(",").map((c) => c.trim());
       filter.colors = { $in: colorArr };
     }
 
@@ -50,7 +50,7 @@ exports.getProducts = async (req, res, next) => {
 
     const [products, total] = await Promise.all([
       Product.find(filter).sort(sort).skip(skip).limit(Number(limit)),
-      Product.countDocuments(filter)
+      Product.countDocuments(filter),
     ]);
 
     res.status(200).json({
@@ -59,7 +59,7 @@ exports.getProducts = async (req, res, next) => {
       total,
       page: Number(page),
       pages: Math.ceil(total / Number(limit)),
-      data: products
+      data: products,
     });
   } catch (error) {
     next(error);
@@ -76,7 +76,9 @@ exports.getProduct = async (req, res, next) => {
     const product = await Product.findById(req.params.id);
 
     if (!product || !product.isActive) {
-      return next(new ErrorResponse(`Product not found with id ${req.params.id}`, 404));
+      return next(
+        new ErrorResponse(`Product not found with id ${req.params.id}`, 404),
+      );
     }
 
     res.status(200).json({ success: true, data: product });
@@ -94,10 +96,12 @@ exports.getFeaturedProducts = async (req, res, next) => {
   try {
     const limit = Number(req.query.limit) || 8;
     const products = await Product.find({ isFeatured: true, isActive: true })
-      .sort('-createdAt')
+      .sort("-createdAt")
       .limit(limit);
 
-    res.status(200).json({ success: true, count: products.length, data: products });
+    res
+      .status(200)
+      .json({ success: true, count: products.length, data: products });
   } catch (error) {
     next(error);
   }
@@ -118,8 +122,8 @@ exports.getProductsByCategory = async (req, res, next) => {
     const filter = { category: category.toLowerCase(), isActive: true };
 
     const [products, total] = await Promise.all([
-      Product.find(filter).sort('-createdAt').skip(skip).limit(limit),
-      Product.countDocuments(filter)
+      Product.find(filter).sort("-createdAt").skip(skip).limit(limit),
+      Product.countDocuments(filter),
     ]);
 
     res.status(200).json({
@@ -128,7 +132,7 @@ exports.getProductsByCategory = async (req, res, next) => {
       total,
       page,
       pages: Math.ceil(total / limit),
-      data: products
+      data: products,
     });
   } catch (error) {
     next(error);
@@ -170,7 +174,9 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
       sku,
       brand,
       tags,
-      isFeatured
+      isFeatured,
+      isCustomisable,
+      customisationPrice,
     } = req.body;
 
     const files = req.files || [];
@@ -178,17 +184,18 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
 
     // Coerce types from multipart/form-data (strings) into proper types
     const toNumber = (value) => {
-      if (value === undefined || value === null || value === '') return undefined;
+      if (value === undefined || value === null || value === "")
+        return undefined;
       const num = Number(value);
       return Number.isNaN(num) ? undefined : num;
     };
 
     const toBoolean = (value) => {
-      if (typeof value === 'boolean') return value;
+      if (typeof value === "boolean") return value;
       if (value === undefined || value === null) return undefined;
       const val = String(value).toLowerCase();
-      if (val === 'true') return true;
-      if (val === 'false') return false;
+      if (val === "true") return true;
+      if (val === "false") return false;
       return undefined;
     };
 
@@ -196,7 +203,7 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
       if (!value) return undefined;
       if (Array.isArray(value)) return value;
       return String(value)
-        .split(',')
+        .split(",")
         .map((v) => v.trim())
         .filter(Boolean);
     };
@@ -212,10 +219,12 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
       sku,
       brand,
       isFeatured: toBoolean(isFeatured),
+      isCustomisable: toBoolean(isCustomisable),
+      customisationPrice: toNumber(customisationPrice),
       // Optional arrays
       sizes: toArrayFromCSV(sizes),
       colors: toArrayFromCSV(colors),
-      tags: toArrayFromCSV(tags)
+      tags: toArrayFromCSV(tags),
     };
 
     if (imageUrls.length) {
@@ -226,7 +235,7 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
 
     return res.status(201).json({
       success: true,
-      product
+      product,
     });
   } catch (error) {
     next(error);
@@ -240,14 +249,15 @@ exports.adminCreateProductWithImages = async (req, res, next) => {
 // ─────────────────────────────────────────────────────────────────────────────
 exports.updateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
-      return next(new ErrorResponse(`Product not found with id ${req.params.id}`, 404));
+      return next(
+        new ErrorResponse(`Product not found with id ${req.params.id}`, 404),
+      );
     }
 
     res.status(200).json({ success: true, data: product });
@@ -266,7 +276,9 @@ exports.deleteProduct = async (req, res, next) => {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return next(new ErrorResponse(`Product not found with id ${req.params.id}`, 404));
+      return next(
+        new ErrorResponse(`Product not found with id ${req.params.id}`, 404),
+      );
     }
 
     // Soft delete — keeps DB record but hides from public queries

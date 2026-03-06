@@ -140,6 +140,24 @@ export default function ProductCard({ product }: ProductCardProps) {
                 NEW
               </span>
             )}
+
+            {product.isCustomisable && (
+              <span
+                style={{
+                  backgroundColor: "#0d9488",
+                  color: "#f0fdfa",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "0.25rem 0.6rem",
+                  borderRadius: "9999px",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                CUSTOMISABLE
+              </span>
+            )}
           </div>
 
           {hasDiscount && (

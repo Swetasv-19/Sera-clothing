@@ -1,100 +1,109 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please add a product name'],
+      required: [true, "Please add a product name"],
       trim: true,
-      maxlength: [120, 'Name cannot be more than 120 characters']
+      maxlength: [120, "Name cannot be more than 120 characters"],
     },
     description: {
       type: String,
-      required: [true, 'Please add a description'],
-      maxlength: [2000, 'Description cannot be more than 2000 characters']
+      required: [true, "Please add a description"],
+      maxlength: [2000, "Description cannot be more than 2000 characters"],
     },
     price: {
       type: Number,
-      required: [true, 'Please add a price'],
-      min: [0, 'Price must be a positive number']
+      required: [true, "Please add a price"],
+      min: [0, "Price must be a positive number"],
     },
     discountPrice: {
       type: Number,
       default: null,
-      min: [0, 'Discount price must be a positive number']
+      min: [0, "Discount price must be a positive number"],
     },
     category: {
       type: String,
-      required: [true, 'Please add a category'],
-      enum: ['men', 'women', 'kids', 'accessories', 'sale'],
-      lowercase: true
+      required: [true, "Please add a category"],
+      enum: ["men", "women", "kids", "accessories", "sale"],
+      lowercase: true,
     },
     subCategory: {
       type: String,
       trim: true,
-      default: ''
+      default: "",
     },
     sizes: {
       type: [String],
-      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Free Size'],
-      default: []
+      enum: ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "Free Size"],
+      default: [],
     },
     colors: {
       type: [String],
-      default: []
+      default: [],
     },
     images: {
       type: [String],
-      default: []
+      default: [],
     },
     stock: {
       type: Number,
-      required: [true, 'Please add stock quantity'],
-      min: [0, 'Stock cannot be negative'],
-      default: 0
+      required: [true, "Please add stock quantity"],
+      min: [0, "Stock cannot be negative"],
+      default: 0,
     },
     sku: {
       type: String,
       trim: true,
       unique: true,
-      sparse: true   // allows multiple docs with null sku
+      sparse: true, // allows multiple docs with null sku
     },
     brand: {
       type: String,
       trim: true,
-      default: 'Sera'
+      default: "Sera",
     },
     tags: {
       type: [String],
-      default: []
+      default: [],
     },
     ratings: {
       average: {
         type: Number,
         default: 0,
         min: 0,
-        max: 5
+        max: 5,
       },
       count: {
         type: Number,
-        default: 0
-      }
+        default: 0,
+      },
     },
     isFeatured: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
+    isCustomisable: {
+      type: Boolean,
+      default: false,
+    },
+    customisationPrice: {
+      type: Number,
+      default: null,
+      min: [0, "Customisation price must be a positive number"],
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
 // Text index for search
-productSchema.index({ name: 'text', description: 'text', tags: 'text' });
+productSchema.index({ name: "text", description: "text", tags: "text" });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model("Product", productSchema);
