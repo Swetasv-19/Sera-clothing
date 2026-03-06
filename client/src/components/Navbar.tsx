@@ -122,25 +122,12 @@ export default function Navbar() {
             flexShrink: 0,
           }}
         >
-          <div
-            style={{
-              width: "2.25rem",
-              height: "2.25rem",
-              borderRadius: "0.5rem",
-              backgroundColor: "var(--foreground)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "opacity 0.2s",
-            }}
-          >
-            <Icon
-              icon="mdi:clothing-store"
-              width={20}
-              height={20}
-              style={{ color: "var(--background)" }}
-            />
-          </div>
+          <Icon
+            icon="mdi:clothing-store"
+            width={28}
+            height={28}
+            style={{ color: "var(--foreground)" }}
+          />
           <span
             className="font-serif"
             style={{
