@@ -117,7 +117,7 @@ export default function UserModal({
 
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto padding-around scrollbar-hide bg-[var(--surface)]">
-          <form id="user-form" onSubmit={handleSubmit} className="space-y-6">
+          <form id="user-form" onSubmit={handleSubmit} className="space-y-6 gap-form">
             {error && (
               <div className="padding-around rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium flex items-center gap-2">
                 <Icon
@@ -143,7 +143,7 @@ export default function UserModal({
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                  className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                   placeholder="e.g. John Doe"
                 />
               </div>
@@ -164,7 +164,7 @@ export default function UserModal({
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                  className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                   placeholder="e.g. john@example.com"
                 />
               </div>
@@ -191,7 +191,7 @@ export default function UserModal({
                   value={formData.password}
                   onChange={handleChange}
                   required={!user}
-                  className="w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
+                  className="input-box w-full padding-around pl-12 bg-[var(--surface-alt)] border border-[var(--card-border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all placeholder:text-[var(--muted)]/50 font-medium"
                   placeholder="Enter strong password"
                 />
               </div>
@@ -218,7 +218,7 @@ export default function UserModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--card-border)] shrink-0">
+            <div className="padding-around flex items-center gap-3 p-4 bg-[var(--surface-alt)] rounded-xl border border-[var(--card-border)] shrink-0">
               <div className="flex-1">
                 <h4 className="text-sm font-bold text-[var(--foreground)]">
                   Active Account

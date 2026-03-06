@@ -48,3 +48,9 @@
 .padding-around-m {
   padding: 0.4em;
 }
+
+.gap-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}

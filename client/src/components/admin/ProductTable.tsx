@@ -160,7 +160,7 @@ const ProductTable = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 rounded-lg bg-[var(--surface-alt)] text-[var(--foreground)] text-[10px] font-bold uppercase tracking-wider border border-[var(--card-border)]">
+                    <span className="padding-around-s px-2.5 py-1 rounded-lg bg-[var(--surface-alt)] text-[var(--foreground)] text-[10px] font-bold uppercase tracking-wider border border-[var(--card-border)]">
                       {product.category}
                     </span>
                   </td>

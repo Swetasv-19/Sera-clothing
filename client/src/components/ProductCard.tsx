@@ -268,28 +268,6 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             )}
           </div>
-
-          <button
-            aria-label="Wishlist"
-            style={{
-              padding: "0.4rem",
-              borderRadius: "0.4rem",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "var(--muted)",
-              transition: "color 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.color =
-                "var(--accent-secondary)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.color = "var(--muted)")
-            }
-          >
-            <Icon icon="mdi:heart-outline" width={20} height={20} />
-          </button>
         </div>
 
         {/* Stars */}

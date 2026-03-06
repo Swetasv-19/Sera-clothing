@@ -70,7 +70,7 @@ const UserTable = () => {
   return (
     <div className="margin-top-lg padding-around bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] shadow-sm overflow-hidden transition-colors duration-300 block">
       <div className="p-6 border-b border-[var(--card-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md group">
+        <div className="margin-bottom relative flex-1 max-w-md group">
           <Icon
             icon="material-symbols:search"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] group-focus-within:text-[var(--accent-primary)] transition-colors"
@@ -86,7 +86,7 @@ const UserTable = () => {
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-gray-300 bg-transparent border border-[var(--card-border)] hover:border-gray-500 hover:text-white rounded-md transition-all duration-200"
+          className="padding-around-s margin-bottom flex items-center gap-2 px-5 py-2 text-sm font-semibold text-gray-300 bg-transparent border border-[var(--card-border)] hover:border-gray-500 hover:text-white rounded-md transition-all duration-200"
         >
           <Icon
             icon="material-symbols:add"
