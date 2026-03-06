@@ -5,3 +5,6 @@ node_modules
 seedAdmin.js
 seedProducts.js
 seedSaleProduct.js
+.agent
+
+openspec

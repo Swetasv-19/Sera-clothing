@@ -83,7 +83,7 @@ export default function Hero() {
           }}
         >
           Elevate your wardrobe with our curated collection of premium fashion
-          pieces. Timeless elegance meets contemporary design.
+          pieces.
         </p>
 
         <div

@@ -7,49 +7,8 @@ import { Icon } from "@iconify/react";
 import { productService } from "@/services/product.service";
 import { Product } from "@/types/product";
 
-// Fallback products in case API is not running or empty
-const fallbackProducts: Product[] = [
-  {
-    _id: "1",
-    name: "Elegant Silk Blouse",
-    description: "Premium silk blouse for special occasions",
-    price: 89.99,
-    images: [
-      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop",
-    ],
-    category: "women",
-    isFeatured: true,
-    isActive: true,
-    brand: "Sera",
-    sizes: ["S", "M", "L"],
-    colors: ["Cream"],
-    stock: 10,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "2",
-    name: "Classic Wool Coat",
-    description: "Handcrafted wool coat for winter",
-    price: 249.99,
-    discountPrice: 199.99,
-    images: [
-      "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop",
-    ],
-    category: "women",
-    isFeatured: true,
-    isActive: true,
-    brand: "Sera",
-    sizes: ["M", "L", "XL"],
-    colors: ["Beige"],
-    stock: 5,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
