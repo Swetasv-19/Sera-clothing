@@ -105,12 +105,12 @@ export default function ProductPage() {
 
   return (
     <div className="w-full bg-(--background) animate-fadeIn">
-      <div className="h-screen w-full p-4 sm:p-6 lg:p-8 flex items-center justify-center overflow-hidden">
+      <div className="min-h-[calc(100vh-64px)] w-full p-6 sm:p-10 lg:p-16 flex items-center justify-center">
         {/* Invisible centered card */}
-        <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-12 bg-transparent">
+        <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-10 lg:gap-16 bg-transparent">
           {/* Left side: Image carousel */}
-          <div className="w-full md:w-[300px] flex-shrink-0 flex flex-col justify-center gap-6 h-[50vh] md:h-full">
-            <div className="relative w-full h-[300px] min-h-[300px] overflow-hidden rounded-2xl bg-(--surface)">
+          <div className="w-full md:w-[380px] flex-shrink-0 flex flex-col justify-center gap-6">
+            <div className="relative w-full h-[380px] min-h-[380px] overflow-hidden rounded-2xl bg-(--surface)">
               <img
                 src={images[currentImageIndex]}
                 alt={product.name}
@@ -136,10 +136,19 @@ export default function ProductPage() {
               {/* Sale Badge */}
               {product.discountPrice &&
                 product.discountPrice < product.price && (
-                  <div className="absolute top-4 right-4 bg-(--foreground) text-(--background) px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
+                  <div className="absolute top-4 left-4 bg-(--foreground) text-(--background) px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
                     Sale
                   </div>
                 )}
+
+              {/* Wishlist Button */}
+              <div className="absolute top-3 right-3 z-10">
+                <WishlistButton
+                  productId={product._id}
+                  size="sm"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all"
+                />
+              </div>
             </div>
 
             {/* Thumbnails */}
@@ -167,8 +176,8 @@ export default function ProductPage() {
           </div>
 
           {/* Right side: Product details */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center py-2 max-h-[85vh] overflow-y-auto scrollbar-none">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-(--foreground) font-bold mb-3 tracking-tight">
+          <div className="w-full md:w-1/2 flex flex-col justify-center py-4 px-2 max-h-[90vh] overflow-y-auto scrollbar-none">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif text-(--foreground) font-bold mb-4 tracking-tight">
               {product.name}
             </h1>
 
@@ -189,12 +198,12 @@ export default function ProductPage() {
             </div>
 
             {/* Description */}
-            <p className="text-(--foreground) text-base sm:text-lg mb-8 leading-relaxed max-w-prose opacity-80">
+            <p className="text-(--foreground) text-base sm:text-lg mb-10 leading-relaxed max-w-prose opacity-80">
               {product.description}
             </p>
 
             {/* Price */}
-            <div className="flex items-end gap-4 mb-8">
+            <div className="flex items-end gap-4 mb-10">
               <span className="text-3xl sm:text-4xl font-bold text-(--foreground)">
                 ₹{activePrice}
               </span>
@@ -214,7 +223,7 @@ export default function ProductPage() {
 
             {/* Standard / Customised Selector */}
             {product.isCustomisable && (
-              <div className="mb-8">
+              <div className="margin-top mb-10">
                 <h3 className="text-sm font-bold text-(--foreground) uppercase tracking-widest mb-4 opacity-80">
                   Choose Option
                 </h3>
@@ -261,11 +270,11 @@ export default function ProductPage() {
               </div>
             )}
 
-            <div className="w-full h-px bg-(--divider) mb-8" />
+            {/* <div className="w-full h-px bg-(--divider) mb-10" /> */}
 
             {/* Colors available (Text only) */}
             {product.colors && product.colors.length > 0 && (
-              <div className="mb-8">
+              <div className="mb-10">
                 <h3 className="text-sm font-bold text-(--foreground) uppercase tracking-widest mb-2 opacity-80">
                   Available Colors
                 </h3>
@@ -301,7 +310,7 @@ export default function ProductPage() {
 
             {/* Customisation Upload */}
             {product.isCustomisable && customisationSelected && (
-              <div className="mb-12">
+              <div className="margin-top mb-12">
                 <h3 className="text-sm font-bold text-(--foreground) uppercase tracking-widest mb-4 opacity-80 flex items-center gap-2">
                   <Icon icon="mdi:palette-outline" className="w-5 h-5" />
                   Customise Your Design
@@ -378,25 +387,21 @@ export default function ProductPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+            <div className="margin-top-lg mt-6 pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 h-16 rounded-full bg-(--surface) border-2 border-(--foreground) text-(--foreground) font-bold text-lg hover:bg-(--foreground) hover:text-(--background) transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md cursor-pointer"
+                className="w-full sm:flex-1 flex items-center justify-center gap-2 h-12 rounded-[8px] border border-(--foreground)/40 text-(--foreground) hover:bg-(--foreground) hover:text-(--background) transition duration-200"
               >
-                <Icon icon="mdi:cart-outline" className="w-6 h-6" />
+                <Icon icon="mdi:cart-outline" className="w-5 h-5" />
                 Add to Cart
               </button>
+
               <button
                 onClick={handleBuyNow}
-                className="flex-1 h-16 rounded-full bg-(--foreground) border-2 border-(--foreground) text-(--background) font-bold text-lg hover:bg-transparent hover:text-(--foreground) transition-all shadow-md hover:shadow-lg cursor-pointer"
+                className="w-full sm:flex-1 flex items-center justify-center h-12 rounded-[8px] bg-(--foreground) text-(--background) hover:opacity-90 transition duration-200"
               >
                 Buy Now
               </button>
-              <WishlistButton
-                productId={product._id}
-                size="lg"
-                className="flex-shrink-0"
-              />
             </div>
           </div>
         </div>
